@@ -55,7 +55,7 @@ const increaseExamButton = document.getElementById("increaseExamButton");
 
 let reports = [];
 let activeStudentNo = "";
-let denemeNetler = [11, 13, 14, 0];
+let denemeNetler = [];
 let chartInst = null;
 let activeClass = "5";
 let activeBranch = "A";
@@ -220,14 +220,26 @@ function reportDenemeNetleri(report = {}) {
   for (let index = 1; index <= DENEME_LIMIT; index += 1) {
     const raw = report[`deneme${index}`];
     if (raw === undefined || raw === null || raw === "") continue;
-    values.push(Math.round(Math.max(0, Math.min(20, asNumber(raw)))));
+    const net = asNumber(raw);
+    if (net <= 0) continue;
+    values.push(Math.round(Math.max(0, Math.min(20, net))));
   }
 
   return values;
 }
 
 function currentNet() {
-  return Math.round(Math.max(0, Math.min(20, asNumber(denemeNetler[denemeNetler.length - 1]))));
+  if (!denemeNetler.length) return "";
+  const net = Math.round(Math.max(0, Math.min(20, asNumber(denemeNetler[denemeNetler.length - 1]))));
+  return net > 0 ? net : "";
+}
+
+function hasEnteredValue(value) {
+  return value !== undefined && value !== null && String(value).trim() !== "" && Number(value) > 0;
+}
+
+function optionalNumber(value) {
+  return hasEnteredValue(value) ? asNumber(value) : "";
 }
 
 function escapeHtml(value) {
@@ -253,11 +265,11 @@ function collectForm() {
   const report = Object.fromEntries(data.entries());
   report.adSoyad = `${report.ad || ""} ${report.soyad || ""}`.trim();
   report.pin = generatePin(report.studentNo, report.adSoyad);
-  report.odevYuzde = asNumber(report.odevYuzde);
-  report.katilimYuzde = asNumber(report.katilimYuzde);
-  report.dogru = asNumber(report.dogru);
-  report.yanlis = asNumber(report.yanlis);
-  report.bos = asNumber(report.bos);
+  report.odevYuzde = optionalNumber(report.odevYuzde);
+  report.katilimYuzde = optionalNumber(report.katilimYuzde);
+  report.dogru = optionalNumber(report.dogru);
+  report.yanlis = optionalNumber(report.yanlis);
+  report.bos = optionalNumber(report.bos);
   denemeNetler.slice(0, DENEME_LIMIT).forEach((net, index) => {
     report[`deneme${index + 1}`] = Math.round(Math.max(0, Math.min(20, asNumber(net))));
   });
@@ -337,20 +349,20 @@ function fillForm(report = {}) {
   form.elements.sinif.value = report.sinif || "";
   form.elements.sube.value = report.sube || "";
   form.elements.pin.value = report.pin || generatePin(report.studentNo, displayName);
-  form.elements.odevYuzde.value = report.odevYuzde || 0;
-  form.elements.katilimYuzde.value = report.katilimYuzde || 0;
+  form.elements.odevYuzde.value = hasEnteredValue(report.odevYuzde) ? report.odevYuzde : "";
+  form.elements.katilimYuzde.value = hasEnteredValue(report.katilimYuzde) ? report.katilimYuzde : "";
   form.elements.islenenKonu.value = report.islenenKonu || "";
   form.elements.anlamaDuzeyi.value = understandingLevel || "";
   form.elements.evCalismasi.value = report.evCalismasi || "";
-  form.elements.dogru.value = report.dogru || 0;
-  form.elements.yanlis.value = report.yanlis || 0;
-  form.elements.bos.value = report.bos || 0;
+  form.elements.dogru.value = hasEnteredValue(report.dogru) ? report.dogru : "";
+  form.elements.yanlis.value = hasEnteredValue(report.yanlis) ? report.yanlis : "";
+  form.elements.bos.value = hasEnteredValue(report.bos) ? report.bos : "";
   form.elements.ogretmenNotu.value = report.ogretmenNotu || "";
 
   const savedDenemeler = reportDenemeNetleri(report);
   denemeNetler = savedDenemeler.length
     ? savedDenemeler
-    : [11, 13, 14, 15];
+    : [];
 
   updateMainViewedBadge(report);
   updateComputedFields();
@@ -360,19 +372,23 @@ function fillForm(report = {}) {
 function updateComputedFields() {
   nameInput.value = `${firstNameInput.value.trim()} ${lastNameInput.value.trim()}`.trim();
   pinInput.value = generatePin(studentNoInput.value, nameInput.value);
-  const homework = Math.max(0, Math.min(100, asNumber(document.getElementById("homeworkInput").value)));
-  const participation = Math.max(0, Math.min(100, asNumber(document.getElementById("participationInput").value)));
+  const homeworkRaw = document.getElementById("homeworkInput").value;
+  const participationRaw = document.getElementById("participationInput").value;
+  const hasHomework = hasEnteredValue(homeworkRaw);
+  const hasParticipation = hasEnteredValue(participationRaw);
+  const homework = hasHomework ? Math.max(0, Math.min(100, asNumber(homeworkRaw))) : 0;
+  const participation = hasParticipation ? Math.max(0, Math.min(100, asNumber(participationRaw))) : 0;
   const net = currentNet();
-  netPreview.textContent = String(net);
+  netPreview.textContent = net === "" ? "" : String(net);
 
-  homeworkDisplay.textContent = `%${homework}`;
+  homeworkDisplay.textContent = hasHomework ? `%${homework}` : "";
   homeworkArc.setAttribute("stroke-dasharray", `${homework} ${100 - homework}`);
   participationArc.setAttribute("stroke-dasharray", `${participation} ${100 - participation}`);
 
-  if (homework <= 0) {
-    homeworkText.textContent = "Girilmedi";
+  if (!hasHomework) {
+    homeworkText.textContent = "";
     homeworkText.className = "homework-status";
-    homeworkTip.innerHTML = "<span>✓</span><p>Ödev başarı yüzdesini girince veliye uygun kısa değerlendirme otomatik oluşur.</p>";
+    homeworkTip.innerHTML = "";
   } else if (homework >= 80) {
     homeworkText.textContent = "İyi";
     homeworkText.className = "homework-status status-select-good";
@@ -407,10 +423,9 @@ function denemeSayisiDegistir(delta) {
 function renderTrend() {
   if (!denemeNetInputs || !examCountLabel) return;
 
-  if (!denemeNetler.length) denemeNetler = [0];
-
   examCountLabel.textContent = String(denemeNetler.length);
-  netPreview.textContent = String(currentNet());
+  const net = currentNet();
+  netPreview.textContent = net === "" ? "" : String(net);
 
   if (trendChartCanvas && window.Chart) {
     const ctx = trendChartCanvas.getContext("2d");
@@ -461,7 +476,7 @@ function renderTrend() {
   denemeNetInputs.innerHTML = denemeNetler.map((net, index) => `
     <span>
       ${index + 1}. Deneme:
-      <input type="text" inputmode="numeric" pattern="[0-9]*" value="${Math.round(asNumber(net))}"
+      <input type="text" inputmode="numeric" pattern="[0-9]*" value="${asNumber(net) > 0 ? Math.round(asNumber(net)) : ""}"
         data-deneme-index="${index}">
     </span>
   `).join("");

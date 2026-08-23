@@ -1000,9 +1000,20 @@ function colorSelect(el) {
 }
 
 // ── ÖDEV ──
+function hasEnteredValue(value) {
+  return value !== undefined && value !== null && String(value).trim() !== '' && Number(value) > 0;
+}
+
 function updateOdev() {
   const input = document.getElementById('odevBasari');
-  const pct = Math.max(0, Math.min(100, parseInt(input.value) || 0));
+  if (!hasEnteredValue(input.value)) {
+    input.value = '';
+    document.getElementById('odevPct').textContent = '';
+    document.getElementById('odevArc').setAttribute('stroke-dashoffset', '201.10');
+    updateOdevYorumu('');
+    return;
+  }
+  const pct = Math.max(0, Math.min(100, parseInt(input.value, 10) || 0));
   input.value = pct;
   document.getElementById('odevPct').textContent = '%' + pct;
   const offset = 201.1 * (1 - pct / 100);
@@ -1014,6 +1025,15 @@ function updateOdevYorumu(pct) {
   const tipBox = document.getElementById('odevTipBox');
   const tipInput = document.getElementById('odevTip');
   const durumEl = document.getElementById('odevDurum');
+  if (!hasEnteredValue(pct)) {
+    tipBox.className = 'tip-box';
+    durumEl.textContent = '';
+    durumEl.className = 'stat-val';
+    tipInput.value = '';
+    tipInput.style.height = 'auto';
+    return;
+  }
+
   let durum = 'tip-good';
   let durumMetni = 'Çok iyi';
   let mesaj = 'Ödevlerini düzenli ve eksiksiz tamamlıyor. Bu çalışma disiplini başarıya olumlu yansıyor.';
@@ -1042,7 +1062,14 @@ function updateOdevYorumu(pct) {
 
 // ── KATILIM ──
 function updateKat() {
-  const pct = parseInt(document.getElementById('katPct').value) || 0;
+  const input = document.getElementById('katPct');
+  if (!hasEnteredValue(input.value)) {
+    input.value = '';
+    document.getElementById('katArc').setAttribute('stroke-dashoffset', '201.10');
+    return;
+  }
+  const pct = Math.max(0, Math.min(100, parseInt(input.value, 10) || 0));
+  input.value = pct;
   const offset = 201.1 * (1 - pct / 100);
   document.getElementById('katArc').setAttribute('stroke-dashoffset', offset.toFixed(2));
 }
@@ -1059,7 +1086,7 @@ function updateNet() {
 }
 
 // ── TREND CHART ──
-let denemeNetler = [11, 13, 14, 15];
+let denemeNetler = [];
 let chartInst = null;
 const DENEME_LIMIT = 12;
 
@@ -1068,7 +1095,7 @@ function raporDenemeleri(report = {}) {
   for (let index = 1; index <= DENEME_LIMIT; index++) {
     const raw = report['deneme' + index];
     if (raw === undefined || raw === null || raw === '') continue;
-    values.push(Math.round(Math.max(0, Math.min(20, parseFloat(raw) || 0))));
+    const net = parseFloat(raw) || 0; if (net > 0) values.push(Math.round(Math.max(0, Math.min(20, net))));
   }
   return values;
 }
@@ -1086,11 +1113,12 @@ function denemeSayisiDegistir(delta) {
 }
 
 function renderTrend() {
-  const sonNet = denemeNetler.length ? Math.round(denemeNetler[denemeNetler.length - 1]) : 0;
-  document.getElementById('netVal').textContent = sonNet;
+  const sonNet = denemeNetler.length ? Math.round(denemeNetler[denemeNetler.length - 1]) : '';
+  const displayNet = Number(sonNet) > 0 ? sonNet : '';
+  document.getElementById('netVal').textContent = displayNet;
   const netArc = document.getElementById('netArc');
   if (netArc) {
-    const netOffset = 201.1 * (1 - sonNet / 20);
+    const netOffset = displayNet === '' ? 201.1 : 201.1 * (1 - displayNet / 20);
     netArc.setAttribute('stroke-dashoffset', Math.max(0, netOffset).toFixed(2));
   }
 
@@ -1127,7 +1155,7 @@ function renderTrend() {
   wrap.innerHTML = denemeNetler.map((v, i) => `
     <div class="dni-item ${i === denemeNetler.length - 1 ? 'dni-last' : ''}">
       ${i + 1}. Deneme:
-      <input type="number" value="${Math.round(v)}" min="0" max="20" step="1"
+      <input type="number" value="${Number(v) > 0 ? Math.round(v) : ''}" min="0" max="20" step="1"
         onchange="denemeNetler[${i}]=Math.min(20,Math.max(0,parseInt(this.value,10)||0));renderTrend()">
     </div>
   `).join('');
@@ -1561,7 +1589,7 @@ function googleSheetsVerisiniUygula() {
     const report = JSON.parse(raw);
     const setValue = (id, value) => {
       const el = document.getElementById(id);
-      if (el && value !== undefined && value !== null && value !== '') el.value = value;
+      if (el) el.value = value === undefined || value === null || value === 0 ? '' : value;
     };
 
     setValue('studentName', report.adSoyad);
@@ -1584,8 +1612,8 @@ function googleSheetsVerisiniUygula() {
     setValue('bos', report.bos);
     setValue('teacherNote', report.ogretmenNotu);
 
-    const denemeler = raporDenemeleri(report);
-    if (denemeler.length) denemeNetler = denemeler;
+    const denemeler = raporDenemeleri(report).filter(value => Number(value) > 0);
+    denemeNetler = denemeler;
 
     updateOdev();
     updateKat();
@@ -1616,6 +1644,9 @@ veliModuHazirla();
 </script>
 </body>
 </html>
+
+
+
 
 
 
