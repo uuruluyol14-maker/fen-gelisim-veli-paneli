@@ -254,6 +254,40 @@
   }
   @media (max-width: 600px) { .konu-report-grid { grid-template-columns: 1fr; } }
 
+
+  @media (max-width: 760px) {
+    body { font-size: 16px; }
+    .main { width: 100%; max-width: 100%; padding: 14px 10px 32px; overflow-x: hidden; }
+    .topbar { padding: 8px 10px; }
+    .topbar-title { font-size: 14px; }
+    .student-bar { padding: 14px 12px; align-items: flex-start; }
+    .student-left { flex: 1 1 100%; width: 100%; }
+    .student-name-input,
+    body.veli-mode .student-name-input { width: 100%; min-width: 0; font-size: 18px; }
+    .durum-badge { width: 100%; justify-content: space-between; }
+    .grid2 { grid-template-columns: minmax(0, 1fr) !important; gap: 12px; }
+    .card { padding: 16px 12px; min-width: 0; }
+    .donut-row { align-items: flex-start; gap: 12px; }
+    .stat-lines { min-width: 0; }
+    .kat-item { gap: 8px; align-items: flex-start; }
+    .kat-item-left { min-width: 0; flex: 1 1 auto; }
+    .sev-select { flex: 0 0 96px; max-width: 96px; }
+    .teacher-textarea { min-height: 150px; }
+    .konu-report-grid { grid-template-columns: minmax(0, 1fr) !important; gap: 12px; }
+    .konu-field { min-width: 0; width: 100%; }
+    .konu-field input,
+    .konu-field select,
+    .konu-field textarea { width: 100%; min-width: 0; box-sizing: border-box; }
+    .konu-field select,
+    .konu-level { display: block; height: 42px; color: var(--green-dark) !important; -webkit-text-fill-color: var(--green-dark); }
+    body.veli-mode .konu-field select,
+    body.veli-mode .konu-level { background: var(--green-light) !important; border-color: var(--green-mid) !important; color: var(--green-dark) !important; -webkit-text-fill-color: var(--green-dark); }
+    .deneme-wrap { flex-direction: column; gap: 12px; }
+    .deneme-left { width: 100%; flex-direction: row; justify-content: flex-start; }
+    .chart-area { width: 100%; min-width: 0; }
+    .chart-canvas-wrap { width: 100%; overflow: hidden; }
+    .report-footer { padding: 12px 4px; }
+  }
   /* ── OKUNABİLİRLİK ARTIŞI ── */
   .card-title { font-size: 19px; }
   .student-name-input { font-size: 19px; }
@@ -1644,6 +1678,7 @@ veliModuHazirla();
 </script>
 </body>
 </html>
+
 
 
 

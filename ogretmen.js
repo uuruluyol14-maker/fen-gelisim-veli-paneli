@@ -1,5 +1,5 @@
 const GOOGLE_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzw3QdvCMorTvdm-WtAAm-kOU-CfvjD_eXqNcpBKvkpkZz6zylpGKnFTeMLeqwsgBl3/exec";
-const TEACHER_PANEL_PASSWORD = "İsmetİnönü1.";
+const TEACHER_PANEL_PASSWORD = "ugur2026";
 const DENEME_LIMIT = 12;
 
 const form = document.getElementById("reportForm");
