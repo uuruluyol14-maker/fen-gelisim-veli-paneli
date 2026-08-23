@@ -87,17 +87,6 @@ function getReportFromSheets(studentNo, pin) {
   return callSheets("getReport", { studentNo, pin });
 }
 
-async function getReportFromSheetsWithFetch(studentNo, pin) {
-  const url = new URL(GOOGLE_APPS_SCRIPT_URL);
-  url.searchParams.set("action", "getReport");
-  url.searchParams.set("studentNo", studentNo);
-  url.searchParams.set("pin", pin);
-
-  const response = await fetch(url.toString(), { method: "GET" });
-  if (!response.ok) throw new Error("Google Sheets bağlantısı yanıt vermedi.");
-  return response.json();
-}
-
 function getDemoReport(studentNo, pin) {
   const student = demoStudents[studentNo];
   if (!student || student.pin !== pin.toLocaleUpperCase("tr-TR")) {
@@ -128,12 +117,7 @@ loginForm.addEventListener("submit", async (event) => {
   errorMessage.textContent = "Kontrol ediliyor...";
 
   try {
-    let result;
-    try {
-      result = await getReportFromSheetsWithFetch(studentNo, studentPin);
-    } catch (fetchError) {
-      result = await getReportFromSheets(studentNo, studentPin);
-    }
+    const result = await getReportFromSheets(studentNo, studentPin);
 
     if (!result.ok) {
       errorMessage.textContent = result.error || "Öğrenci numarası veya PIN hatalı.";
@@ -145,7 +129,7 @@ loginForm.addEventListener("submit", async (event) => {
   } catch (error) {
     const fallback = getDemoReport(studentNo, studentPin);
     if (!fallback.ok) {
-      errorMessage.textContent = "Google Sheets bağlantısı kurulamadı veya giriş bilgileri hatalı.";
+      errorMessage.textContent = "Google Sheets'e erişilemiyor. Apps Script dağıtımını 'Herkes' erişimine açın veya giriş bilgilerini kontrol edin.";
       return;
     }
 
