@@ -1,0 +1,1623 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fen Gelişim Programı – Haftalık Rapor</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=Nunito+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --green: #1D9E75;
+    --green-light: #E1F5EE;
+    --green-mid: #9FE1CB;
+    --green-dark: #0F6E56;
+    --amber: #EF9F27;
+    --amber-light: #FAEEDA;
+    --amber-dark: #854F0B;
+    --red: #E24B4A;
+    --red-light: #FCEBEB;
+    --red-dark: #A32D2D;
+    --gray: #6B7280;
+    --gray-light: #F3F4F6;
+    --gray-border: #E5E7EB;
+    --text: #1F2937;
+    --text-muted: #6B7280;
+    --text-hint: #9CA3AF;
+    --bg: #F8FAF9;
+    --card: #FFFFFF;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  body {
+    font-family: 'Nunito Sans', sans-serif;
+    font-size: 17px;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  /* ── TOP BAR ── */
+  .topbar {
+    background: var(--card);
+    border-bottom: 1px solid var(--gray-border);
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .topbar-brand { display: flex; align-items: center; gap: 10px; }
+  .brand-icon {
+    width: 36px; height: 36px; background: var(--green-light);
+    border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center;
+  }
+  .brand-icon svg { width: 20px; height: 20px; }
+  .brand-name { font-family: 'Nunito', sans-serif; font-size: 15px; font-weight: 700; color: var(--green-dark); line-height: 1.1; }
+  .brand-sub { font-size: 10px; font-weight: 500; color: var(--text-muted); letter-spacing: 0.05em; }
+  .topbar-title { font-family: 'Nunito', sans-serif; font-size: 16px; font-weight: 700; color: var(--text); letter-spacing: 0.02em; }
+  .topbar-right { display: flex; align-items: center; gap: 10px; }
+  input[type="week"] {
+    font-family: 'Nunito Sans', sans-serif;
+    font-size: 12px; color: var(--text-muted);
+    border: 1px solid var(--gray-border); border-radius: var(--radius-sm);
+    padding: 5px 10px; background: var(--gray-light); outline: none;
+  }
+  .btn-print {
+    font-family: 'Nunito', sans-serif; font-size: 12px; font-weight: 700;
+    background: var(--green); color: #fff;
+    border: none; border-radius: var(--radius-sm);
+    padding: 6px 14px; cursor: pointer; display: flex; align-items: center; gap: 6px;
+    transition: background 0.15s;
+  }
+  .btn-print:hover { background: var(--green-dark); }
+
+  /* ── MAIN ── */
+  .main { max-width: 900px; margin: 0 auto; padding: 24px 16px 48px; }
+
+  /* ── STUDENT BAR ── */
+  .student-bar {
+    background: var(--card); border: 1px solid var(--gray-border);
+    border-radius: var(--radius); padding: 16px 20px;
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 16px; gap: 12px; flex-wrap: wrap;
+  }
+  .student-left { display: flex; align-items: center; gap: 14px; flex: 1 1 420px; min-width: 0; }
+  .avatar {
+    width: 48px; height: 48px; border-radius: 50%;
+    background: var(--green-light); display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .avatar svg { width: 26px; height: 26px; }
+  .student-name-input {
+    font-family: 'Nunito', sans-serif; font-size: 16px; font-weight: 700;
+    color: var(--text); border: none; background: transparent; outline: none;
+    border-bottom: 1.5px dashed var(--gray-border); width: min(520px, 100%); min-width: 280px;
+    padding-bottom: 2px;
+  }
+  .student-name-input::placeholder { color: var(--text-hint); }
+  .sinif-select {
+    font-family: 'Nunito Sans', sans-serif; font-size: 13px;
+    border: 1px solid var(--gray-border); border-radius: 6px;
+    padding: 3px 8px; background: var(--gray-light); color: var(--text-muted);
+    margin-top: 4px; cursor: pointer; outline: none;
+  }
+  .durum-badge {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--green-light); border-radius: var(--radius-sm);
+    padding: 8px 16px;
+  }
+  .durum-badge svg { width: 18px; height: 18px; }
+  .durum-label { font-size: 12px; color: var(--green-dark); }
+  .durum-select {
+    font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 700;
+    color: var(--green-dark); border: none; background: transparent; outline: none; cursor: pointer;
+  }
+
+  /* ── GRID ── */
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  @media (max-width: 600px) { .grid2 { grid-template-columns: 1fr; } }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--card); border: 1px solid var(--gray-border);
+    border-radius: var(--radius); padding: 18px 20px;
+  }
+  .card-title {
+    display: flex; align-items: center; gap: 8px;
+    font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 700;
+    color: var(--text); margin-bottom: 14px;
+  }
+  .card-title svg { width: 20px; height: 20px; color: var(--green); flex-shrink: 0; }
+  .classic-report-card {
+    font-family: 'Nunito Sans', sans-serif;
+  }
+  .classic-report-card .card-title {
+    font-family: 'Nunito', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .classic-report-card .stat-lbl,
+  .classic-report-card .kat-item-left {
+    font-family: 'Nunito Sans', sans-serif;
+    font-weight: 500;
+  }
+  .classic-report-card .stat-val,
+  .classic-report-card .donut-label,
+  .classic-report-card .sev-select {
+    font-family: 'Nunito', sans-serif;
+  }
+
+  /* ── DONUT ── */
+  .donut-row { display: flex; align-items: center; gap: 16px; }
+  .donut-wrap { position: relative; width: 94px; height: 94px; flex-shrink: 0; }
+  .donut-wrap svg { width: 94px; height: 94px; transform: rotate(-90deg); }
+  .donut-label {
+    position: absolute; inset: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    font-family: 'Nunito', sans-serif; font-size: 17px; font-weight: 700; color: var(--text);
+  }
+  .donut-sub { font-size: 9px; font-weight: 500; color: var(--text-muted); }
+
+  /* ── STAT LINES ── */
+  .stat-lines { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+  .stat-line { display: flex; flex-direction: column; gap: 1px; }
+  .stat-lbl { font-size: 11px; color: var(--text-muted); }
+  .stat-val { font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 700; }
+  .stat-val input {
+    font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 700;
+    color: var(--green); border: none; background: transparent; outline: none;
+    border-bottom: 1px dashed var(--gray-border); width: 44px; text-align: center;
+  }
+  .stat-val.red { color: var(--red); }
+
+  /* ── TIP BOX ── */
+  .tip-box {
+    display: flex; align-items: flex-start; gap: 8px;
+    background: var(--green-light); border-radius: var(--radius-sm);
+    padding: 8px 12px; margin-top: 12px;
+  }
+  .tip-box svg { width: 15px; height: 15px; color: var(--green); flex-shrink: 0; margin-top: 1px; }
+  .tip-box input, .tip-box textarea {
+    font-family: 'Nunito Sans', sans-serif; font-size: 12px; color: var(--green-dark);
+    background: transparent; border: none; outline: none; width: 100%; resize: none; line-height: 1.4;
+  }
+  .tip-box.tip-good { background: var(--green-light); }
+  .tip-box.tip-good svg, .tip-box.tip-good input, .tip-box.tip-good textarea { color: var(--green-dark); }
+  .tip-box.tip-mid { background: var(--amber-light); }
+  .tip-box.tip-mid svg, .tip-box.tip-mid input, .tip-box.tip-mid textarea { color: var(--amber-dark); }
+  .tip-box.tip-low { background: var(--red-light); }
+  .tip-box.tip-low svg, .tip-box.tip-low input, .tip-box.tip-low textarea { color: var(--red-dark); }
+
+  /* ── KATILIM ── */
+  .kat-list { display: flex; flex-direction: column; gap: 7px; margin-top: 4px; }
+  .kat-item { display: flex; align-items: center; justify-content: space-between; font-size: 13px; }
+  .kat-item-left { display: flex; align-items: center; gap: 6px; color: var(--text-muted); }
+  .kat-item-left svg { width: 14px; height: 14px; }
+  .sev-select {
+    font-family: 'Nunito', sans-serif; font-size: 12px; font-weight: 700;
+    border: 1px solid var(--gray-border); border-radius: 6px;
+    padding: 2px 6px; background: var(--gray-light); cursor: pointer; outline: none;
+  }
+  .sev-iyi { color: var(--green-dark); background: var(--green-light) !important; border-color: var(--green-mid) !important; }
+  .sev-orta { color: var(--amber-dark); background: var(--amber-light) !important; border-color: #FAC775 !important; }
+  .sev-zayif { color: var(--red-dark); background: var(--red-light) !important; border-color: #F7C1C1 !important; }
+
+  /* ── TEACHER NOTE ── */
+  .teacher-textarea {
+    width: 100%; min-height: 132px;
+    font-family: 'Nunito Sans', sans-serif; font-size: 13px; color: var(--text); line-height: 1.6;
+    border: 1px solid var(--gray-border); border-radius: var(--radius-sm);
+    padding: 10px 12px; background: var(--gray-light); resize: vertical; outline: none;
+  }
+  .teacher-textarea:focus { border-color: var(--green-mid); }
+  .teacher-sig {
+    display: flex; align-items: center; gap: 6px; margin-top: 10px;
+  }
+  .teacher-sig svg { width: 14px; height: 14px; color: var(--green); flex-shrink: 0; }
+  .teacher-sig input {
+    font-family: 'Nunito Sans', sans-serif; font-size: 12px; color: var(--green-dark);
+    border: none; background: transparent; outline: none;
+    border-bottom: 1px dashed var(--green-mid); flex: 1 1 auto; width: 100%; min-width: 0;
+  }
+
+  /* ── KONU RAPORU ── */
+  .konu-report { display: grid; gap: 12px; }
+  .konu-report-grid { display: grid; grid-template-columns: 1fr 150px; gap: 10px; }
+  .konu-field { display: grid; gap: 5px; }
+  .konu-field label {
+    font-family: 'Nunito', sans-serif; font-size: 11px; font-weight: 700;
+    color: var(--text-muted);
+  }
+  .konu-field input, .konu-field select, .konu-field textarea {
+    width: 100%; font-family: 'Nunito Sans', sans-serif; font-size: 13px;
+    color: var(--text); border: 1px solid var(--gray-border);
+    border-radius: var(--radius-sm); background: var(--gray-light);
+    outline: none;
+  }
+  .konu-field input, .konu-field select { height: 36px; padding: 0 10px; }
+  .konu-field textarea { min-height: 88px; padding: 9px 10px; resize: vertical; line-height: 1.5; }
+  .konu-field input:focus, .konu-field select:focus, .konu-field textarea:focus { border-color: var(--green-mid); }
+  .konu-level {
+    font-family: 'Nunito', sans-serif !important; font-weight: 700;
+    color: var(--green-dark) !important; background: var(--green-light) !important;
+    border-color: var(--green-mid) !important; cursor: pointer;
+  }
+  @media (max-width: 600px) { .konu-report-grid { grid-template-columns: 1fr; } }
+
+  /* ── OKUNABİLİRLİK ARTIŞI ── */
+  .card-title { font-size: 19px; }
+  .student-name-input { font-size: 19px; }
+  .sinif-select, .durum-select, .stat-val, .stat-val input,
+  .kat-item, .di-row, .di-row input,
+  .teacher-textarea, .konu-field input, .konu-field select, .konu-field textarea,
+  .toplu-textarea, .ogrenci-item-input {
+    font-size: 16px;
+  }
+  .stat-lbl, .tip-box input, .tip-box textarea, .sev-select,
+  .teacher-sig input, .konu-field label, .chart-label,
+  .dni-item, .dni-item input, .report-footer input,
+  .panel-sub, .toplu-hint, .toplu-result,
+  .ogrenci-no-input, .btn-pdf-tek, .btn-pdf-toplu {
+    font-size: 14px;
+  }
+  .donut-label, #netVal { font-size: 20px !important; }
+  .donut-sub { font-size: 11px; }
+
+  /* ── DENEME ── */
+  .deneme-wrap { display: flex; gap: 20px; align-items: flex-start; }
+  .deneme-left { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .deneme-inputs { display: flex; flex-direction: column; gap: 6px; }
+  .di-row { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .dot-g { background: var(--green); }
+  .dot-r { background: var(--red); }
+  .dot-gr { background: var(--gray); }
+  .di-row span { color: var(--text-muted); width: 48px; }
+  .di-row input {
+    font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 700;
+    width: 48px; border: 1px solid var(--gray-border); border-radius: 6px;
+    padding: 3px 6px; text-align: center; background: var(--gray-light); outline: none;
+    color: var(--text);
+  }
+  .chart-area { flex: 1; }
+  .chart-label { font-size: 11px; color: var(--text-muted); margin-bottom: 4px; }
+  .chart-title-stack { display: grid; gap: 3px; }
+  .last-exam-summary {
+    width: fit-content; display: inline-flex; align-items: baseline; gap: 4px;
+    color: var(--text-muted); font-family: 'Nunito Sans', sans-serif;
+    font-size: 11px; font-weight: 600;
+  }
+  .last-exam-summary b { font-family: 'Nunito', sans-serif; font-size: 12px; color: var(--text); font-weight: 800; }
+  .chart-canvas-wrap { height: 110px; }
+  .deneme-net-inputs { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .dni-item { display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--text-muted); }
+  .dni-item input {
+    font-size: 11px; width: 40px; border: 1px solid var(--gray-border);
+    border-radius: 4px; padding: 2px 4px; text-align: center; background: var(--gray-light);
+    outline: none; color: var(--text);
+  }
+  .dni-last input {
+    color: var(--green-dark); background: var(--green-light);
+    border-color: var(--green-mid); font-weight: 700;
+  }
+
+  /* ── FOOTER ── */
+  .report-footer {
+    text-align: center; padding: 14px 16px;
+    border-top: 1px solid var(--gray-border); margin-top: 16px;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .report-footer svg { width: 13px; height: 13px; color: var(--green); flex-shrink: 0; }
+  .report-footer input {
+    font-family: 'Nunito Sans', sans-serif; font-size: 12px; color: var(--text-muted);
+    border: none; background: transparent; outline: none;
+    border-bottom: 1px dashed var(--gray-border); text-align: center; width: 340px;
+  }
+
+  /* ── PRINT ── */
+  @media print {
+    .topbar { display: none; }
+    .main { padding: 0; max-width: 100%; }
+    body { background: #fff; }
+    .card, .student-bar { border: 1px solid #ddd; box-shadow: none; }
+    input, select, textarea { border-color: #ddd !important; }
+    .btn-print { display: none; }
+    .ogrenci-panel { display: none; }
+  }
+
+  body.veli-mode input,
+  body.veli-mode select,
+  body.veli-mode textarea {
+    pointer-events: none;
+  }
+  body.veli-mode .topbar-right,
+  body.veli-mode .btn-ogrenci-listesi,
+  body.veli-mode .btn-print,
+  body.veli-mode .deneme-net-inputs,
+  body.veli-mode .deneme-inputs input,
+  body.veli-mode .chart-label button {
+    display: none !important;
+  }
+  body.veli-mode input,
+  body.veli-mode textarea {
+    border-color: transparent !important;
+    background: transparent !important;
+  }
+  body.veli-mode .student-name-input {
+    width: min(620px, 100%);
+    min-width: 320px;
+  }
+  body.veli-mode select {
+    appearance: none;
+  }
+
+  /* ── ÖĞRENCİ LİSTESİ PANELİ ── */
+  .ogrenci-panel-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.35);
+    z-index: 200; display: flex; align-items: center; justify-content: center;
+    padding: 16px;
+  }
+  .ogrenci-panel {
+    background: var(--card); border-radius: 16px; width: 100%; max-width: 740px;
+    max-height: 88vh; display: flex; flex-direction: column;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.18);
+    overflow: hidden;
+  }
+  .panel-header {
+    padding: 18px 22px 14px; border-bottom: 1px solid var(--gray-border);
+    display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+  }
+  .panel-header-left { display: flex; align-items: center; gap: 10px; }
+  .panel-header-icon {
+    width: 36px; height: 36px; background: var(--green-light); border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .panel-header-icon svg { width: 20px; height: 20px; }
+  .panel-title { font-family: 'Nunito', sans-serif; font-size: 16px; font-weight: 700; color: var(--text); }
+  .panel-sub { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
+  .panel-close {
+    width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--gray-border);
+    background: var(--gray-light); cursor: pointer; display: flex; align-items: center; justify-content: center;
+    color: var(--text-muted); transition: all 0.15s;
+  }
+  .panel-close:hover { background: var(--red-light); color: var(--red); border-color: #F7C1C1; }
+
+  .panel-tabs {
+    display: flex; gap: 0; border-bottom: 1px solid var(--gray-border);
+    padding: 0 22px; flex-shrink: 0; background: var(--gray-light);
+  }
+  .panel-tab {
+    font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 700;
+    padding: 11px 18px; cursor: pointer; border: none; background: transparent;
+    color: var(--text-muted); border-bottom: 2.5px solid transparent;
+    margin-bottom: -1px; transition: all 0.15s; display: flex; align-items: center; gap: 7px;
+  }
+  .panel-tab:hover { color: var(--text); }
+  .panel-tab.active { color: var(--green-dark); border-bottom-color: var(--green); background: var(--card); }
+  .tab-count {
+    font-size: 10px; background: var(--green-light); color: var(--green-dark);
+    border-radius: 10px; padding: 1px 7px; font-weight: 700;
+  }
+  .panel-tab.active .tab-count { background: var(--green); color: #fff; }
+
+  .panel-body { padding: 18px 22px; overflow-y: auto; flex: 1; }
+
+  .toplu-ekle-area {
+    background: var(--gray-light); border: 1.5px dashed var(--gray-border);
+    border-radius: var(--radius); padding: 14px 16px; margin-bottom: 14px;
+  }
+  .toplu-ekle-label {
+    font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 700;
+    color: var(--text); margin-bottom: 6px; display: flex; align-items: center; gap: 6px;
+  }
+  .toplu-ekle-label svg { width: 15px; height: 15px; color: var(--green); }
+  .toplu-hint { font-size: 11px; color: var(--text-hint); margin-bottom: 8px; }
+  .sinifli-ekle-row {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    background: var(--card); border: 1px solid var(--gray-border);
+    border-radius: var(--radius-sm); padding: 9px 10px; margin-bottom: 10px;
+  }
+  .sinifli-ekle-row label {
+    font-family: 'Nunito', sans-serif; font-size: 12px; font-weight: 700;
+    color: var(--text-muted);
+  }
+  .sinifli-ekle-row select {
+    font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 700;
+    color: var(--green-dark); background: var(--green-light);
+    border: 1px solid var(--green-mid); border-radius: 6px;
+    padding: 5px 10px; outline: none; cursor: pointer;
+  }
+  .sinifli-ekle-row span {
+    font-size: 11px; color: var(--text-hint);
+  }
+  .sube-select-wrap {
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .sube-hidden { display: none; }
+  .sube-list-row {
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    margin-bottom: 10px;
+  }
+  .sube-list-row label {
+    font-family: 'Nunito', sans-serif; font-size: 12px; font-weight: 700;
+    color: var(--text-muted);
+  }
+  .sube-list-row select {
+    font-family: 'Nunito', sans-serif; font-size: 12px; font-weight: 700;
+    border: 1px solid var(--gray-border); border-radius: 6px;
+    padding: 4px 8px; background: var(--gray-light); color: var(--green-dark);
+    outline: none; cursor: pointer;
+  }
+  .toplu-textarea {
+    width: 100%; min-height: 88px; font-family: 'Nunito Sans', sans-serif;
+    font-size: 13px; color: var(--text); border: 1px solid var(--gray-border);
+    border-radius: var(--radius-sm); padding: 8px 10px; resize: vertical; outline: none;
+    background: var(--card); line-height: 1.5;
+  }
+  .toplu-textarea:focus { border-color: var(--green-mid); }
+  .toplu-btn-row { display: flex; gap: 8px; margin-top: 8px; align-items: center; }
+  .btn-toplu-ekle {
+    font-family: 'Nunito', sans-serif; font-size: 12px; font-weight: 700;
+    background: var(--green); color: #fff; border: none; border-radius: var(--radius-sm);
+    padding: 7px 16px; cursor: pointer; display: flex; align-items: center; gap: 6px;
+    transition: background 0.15s;
+  }
+  .btn-toplu-ekle:hover { background: var(--green-dark); }
+  .btn-toplu-ekle svg { width: 13px; height: 13px; }
+  .toplu-result { font-size: 11px; color: var(--green-dark); }
+
+  .ogrenci-list-header {
+    display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;
+  }
+  .ogrenci-count-label { font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 700; color: var(--text); }
+  .btn-tamam-sil {
+    font-size: 11px; color: var(--red); background: var(--red-light);
+    border: 1px solid #F7C1C1; border-radius: 6px; padding: 4px 10px;
+    cursor: pointer; font-family: 'Nunito', sans-serif; font-weight: 700;
+  }
+  .btn-tamam-sil:hover { background: #F7C1C1; }
+
+  /* ── PDF BÖLÜMÜ ── */
+  .pdf-section {
+    margin-top: 14px; border-top: 1px solid var(--gray-border); padding-top: 14px;
+  }
+  .pdf-section-title {
+    font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 700;
+    color: var(--text); margin-bottom: 10px; display: flex; align-items: center; gap: 6px;
+  }
+  .pdf-section-title svg { width: 15px; height: 15px; color: var(--red); }
+  .pdf-btn-grid { display: flex; flex-direction: column; gap: 8px; }
+  .btn-pdf-tek {
+    font-family: 'Nunito', sans-serif; font-size: 12px; font-weight: 700;
+    background: var(--red-light); color: var(--red-dark);
+    border: 1.5px solid #F7C1C1; border-radius: var(--radius-sm);
+    padding: 8px 14px; cursor: pointer; display: flex; align-items: center; gap: 7px;
+    transition: all 0.15s; width: 100%;
+  }
+  .btn-pdf-tek:hover { background: #F7C1C1; }
+  .btn-pdf-tek svg { width: 14px; height: 14px; flex-shrink: 0; }
+  .btn-pdf-tek .pdf-btn-label { flex: 1; text-align: left; }
+  .btn-pdf-tek .pdf-btn-count {
+    font-size: 10px; background: var(--red); color: #fff;
+    border-radius: 10px; padding: 1px 7px;
+  }
+  .btn-pdf-toplu {
+    font-family: 'Nunito', sans-serif; font-size: 12px; font-weight: 700;
+    background: var(--green); color: #fff;
+    border: none; border-radius: var(--radius-sm);
+    padding: 8px 14px; cursor: pointer; display: flex; align-items: center; gap: 7px;
+    transition: background 0.15s; width: 100%;
+  }
+  .btn-pdf-toplu:hover { background: var(--green-dark); }
+  .btn-pdf-toplu svg { width: 14px; height: 14px; flex-shrink: 0; }
+  .btn-pdf-toplu .pdf-btn-label { flex: 1; text-align: left; }
+  .btn-pdf-toplu .pdf-btn-count {
+    font-size: 10px; background: rgba(255,255,255,0.3); color: #fff;
+    border-radius: 10px; padding: 1px 7px;
+  }
+
+  /* ── PDF PROGRESS OVERLAY ── */
+  .pdf-progress-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+    z-index: 500; display: flex; align-items: center; justify-content: center;
+  }
+  .pdf-progress-box {
+    background: var(--card); border-radius: 16px; padding: 28px 32px;
+    text-align: center; min-width: 280px; box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+  }
+  .pdf-progress-icon {
+    width: 52px; height: 52px; background: var(--green-light); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; margin: 0 auto 14px;
+  }
+  .pdf-progress-icon svg { width: 26px; height: 26px; }
+  .pdf-progress-title {
+    font-family: 'Nunito', sans-serif; font-size: 15px; font-weight: 700;
+    color: var(--text); margin-bottom: 6px;
+  }
+  .pdf-progress-msg { font-size: 12px; color: var(--text-muted); margin-bottom: 14px; }
+  .pdf-progress-bar-bg {
+    height: 6px; background: var(--gray-border); border-radius: 4px; overflow: hidden;
+  }
+  .pdf-progress-bar {
+    height: 100%; background: var(--green); border-radius: 4px;
+    transition: width 0.3s ease; width: 0%;
+  }
+  .pdf-progress-step { font-size: 11px; color: var(--text-hint); margin-top: 8px; }
+
+  .ogrenci-grid {
+    display: grid; grid-template-columns: 1fr; gap: 8px;
+  }
+  .ogrenci-item {
+    background: var(--gray-light); border: 1px solid var(--gray-border);
+    border-radius: var(--radius-sm); padding: 8px 10px;
+    display: flex; align-items: center; justify-content: space-between; gap: 6px; flex-wrap: wrap;
+  }
+  .ogrenci-item:hover { border-color: var(--green-mid); background: var(--green-light); }
+  .ogrenci-item-no { font-size: 11px; color: var(--text-hint); width: 18px; flex-shrink: 0; }
+  .ogrenci-item-input {
+    font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 600; color: var(--text);
+    border: none; background: transparent; outline: none; flex: 2 1 320px; min-width: 260px;
+  }
+  .ogrenci-no-input {
+    font-family: 'Nunito', sans-serif; font-size: 12px; font-weight: 700; color: var(--green-dark);
+    width: 54px; border: none; background: transparent; outline: none;
+    border-bottom: 1px dashed var(--green-mid); text-align: center; flex-shrink: 0;
+  }
+  .ogrenci-pin {
+    font-family: 'Nunito', sans-serif; font-size: 10px; font-weight: 800;
+    color: var(--amber-dark); background: var(--amber-light);
+    border: 1px solid #FAC775; border-radius: 6px; padding: 2px 6px;
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .ogrenci-item-secbtn {
+    font-size: 10px; background: var(--green); color: #fff; border: none;
+    border-radius: 5px; padding: 3px 8px; cursor: pointer; font-family: 'Nunito', sans-serif;
+    font-weight: 700; flex-shrink: 0; transition: background 0.15s;
+  }
+  .ogrenci-item-secbtn:hover { background: var(--green-dark); }
+  .ogrenci-item-delbtn {
+    width: 20px; height: 20px; border: none; background: transparent; cursor: pointer;
+    color: var(--text-hint); display: flex; align-items: center; justify-content: center;
+    border-radius: 4px; flex-shrink: 0;
+  }
+  .ogrenci-item-delbtn:hover { color: var(--red); background: var(--red-light); }
+  .ogrenci-empty {
+    text-align: center; padding: 32px 16px; color: var(--text-hint);
+    font-size: 13px;
+  }
+  .ogrenci-empty svg { width: 36px; height: 36px; margin: 0 auto 8px; display: block; opacity: 0.4; }
+
+  .btn-ogrenci-listesi {
+    font-family: 'Nunito', sans-serif; font-size: 12px; font-weight: 700;
+    background: var(--card); color: var(--green-dark);
+    border: 1.5px solid var(--green-mid); border-radius: var(--radius-sm);
+    padding: 6px 14px; cursor: pointer; display: flex; align-items: center; gap: 6px;
+    transition: all 0.15s;
+  }
+  .btn-ogrenci-listesi:hover { background: var(--green-light); }
+  .btn-ogrenci-listesi svg { width: 14px; height: 14px; }
+  .total-badge {
+    font-size: 10px; background: var(--green); color: #fff;
+    border-radius: 10px; padding: 1px 7px;
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-brand">
+    <div class="brand-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#1D9E75" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/>
+      </svg>
+    </div>
+    <div>
+      <div class="brand-name">FEN</div>
+      <div class="brand-sub">GELİŞİM PROGRAMI</div>
+    </div>
+  </div>
+  <div class="topbar-title">HAFTALIK GELİŞİM RAPORU</div>
+  <div class="topbar-right">
+    <input type="week" id="weekInput">
+    <button class="btn-ogrenci-listesi" onclick="panelAc()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Öğrenci Listesi
+      <span class="total-badge" id="totalBadge">0</span>
+    </button>
+    <button class="btn-print" onclick="window.print()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+      Yazdır / PDF
+    </button>
+  </div>
+</div>
+
+<!-- ÖĞRENCİ LİSTESİ PANELİ -->
+<div class="ogrenci-panel-overlay" id="panelOverlay" style="display:none;" onclick="panelOverlayClick(event)">
+  <div class="ogrenci-panel">
+    <div class="panel-header">
+      <div class="panel-header-left">
+        <div class="panel-header-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#1D9E75" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <div>
+          <div class="panel-title">Sınıf Öğrenci Listeleri</div>
+          <div class="panel-sub">Toplu öğrenci ekle &amp; yönet, rapora aktar</div>
+        </div>
+      </div>
+      <button class="panel-close" onclick="panelKapat()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <div class="panel-tabs">
+      <button class="panel-tab active" id="tab5" onclick="tabSec('5')">
+        5. Sınıf <span class="tab-count" id="cnt5">0</span>
+      </button>
+      <button class="panel-tab" id="tab6" onclick="tabSec('6')">
+        6. Sınıf <span class="tab-count" id="cnt6">0</span>
+      </button>
+      <button class="panel-tab" id="tab7" onclick="tabSec('7')">
+        7. Sınıf <span class="tab-count" id="cnt7">0</span>
+      </button>
+      <button class="panel-tab" id="tab8" onclick="tabSec('8')">
+        8. Sınıf <span class="tab-count" id="cnt8">0</span>
+      </button>
+    </div>
+
+    <div class="panel-body">
+      <!-- TOPLU EKLE ALANI -->
+      <div class="toplu-ekle-area">
+        <div class="toplu-ekle-label">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Toplu Öğrenci Ekle
+        </div>
+        <div class="sinifli-ekle-row">
+          <label for="eklenecekSinif">Eklenecek sınıf</label>
+          <select id="eklenecekSinif" onchange="tabSec(this.value)">
+            <option value="5">5. Sınıf</option>
+            <option value="6">6. Sınıf</option>
+            <option value="7">7. Sınıf</option>
+            <option value="8">8. Sınıf</option>
+          </select>
+          <span class="sube-select-wrap" id="eklenecekSubeWrap">
+            <label for="eklenecekSube">Şube</label>
+            <select id="eklenecekSube" onchange="subeSec(this.value)">
+              <option value="A">A Şubesi</option>
+              <option value="B">B Şubesi</option>
+              <option value="C">C Şubesi</option>
+              <option value="D">D Şubesi</option>
+            </select>
+          </span>
+          <span>Öğrenciler seçilen sınıf ve şube listesine kaydedilir.</span>
+        </div>
+        <div class="toplu-hint">Her satıra öğrenci no + ad soyad yazın. Sadece ad yazılırsa sistem geçici numara üretir.</div>
+        <textarea class="toplu-textarea" id="topluInput" placeholder="Örnek:&#10;1001 Ali Yılmaz&#10;1002 Ayşe Kaya&#10;1003 Mehmet Demir&#10;1004 Zeynep Çelik"></textarea>
+        <div class="toplu-btn-row">
+          <button class="btn-toplu-ekle" onclick="topluEkle()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Listeye Ekle
+          </button>
+          <span class="toplu-result" id="topluResult"></span>
+        </div>
+      </div>
+
+      <!-- ÖĞRENCİ LİSTESİ -->
+      <div class="sube-list-row" id="subeListRow">
+        <label for="aktifSube">Görüntülenen şube</label>
+        <select id="aktifSube" onchange="subeSec(this.value)">
+          <option value="A">A Şubesi</option>
+          <option value="B">B Şubesi</option>
+          <option value="C">C Şubesi</option>
+          <option value="D">D Şubesi</option>
+        </select>
+      </div>
+      <div class="ogrenci-list-header">
+        <span class="ogrenci-count-label" id="listLabel">5. Sınıf — 0 öğrenci</span>
+        <button class="btn-tamam-sil" onclick="sinifTemizle()">Listeyi Temizle</button>
+      </div>
+      <div class="ogrenci-grid" id="ogrenciGrid"></div>
+
+      <!-- PDF BÖLÜMÜ -->
+      <div class="pdf-section">
+        <div class="pdf-section-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          PDF Kaydet
+        </div>
+        <div class="pdf-btn-grid">
+          <button class="btn-pdf-tek" onclick="pdfTekOgrenci()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <span class="pdf-btn-label">Mevcut Öğrenci PDF'i</span>
+            <span style="font-size:10px;color:var(--text-hint);">Rapordaki öğrenci</span>
+          </button>
+          <button class="btn-pdf-toplu" id="btnPdfSinif" onclick="pdfSinifToplu()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+            <span class="pdf-btn-label" id="pdfTopluLabel">5. Sınıf — Toplu PDF</span>
+            <span class="pdf-btn-count" id="pdfTopluCount">0 öğrenci</span>
+          </button>
+        </div>
+        <div style="font-size:10px;color:var(--text-hint);margin-top:8px;line-height:1.5;">
+          Toplu PDF'de her öğrenci için mevcut rapor şablonu kullanılır. Her sayfa ayrı öğrenciye aittir.
+        </div>
+      </div>
+
+    </div><!-- /panel-body -->
+  </div><!-- /ogrenci-panel -->
+</div><!-- /panelOverlay -->
+
+<!-- PDF PROGRESS OVERLAY -->
+<div id="pdfProgressOverlay" class="pdf-progress-overlay" style="display:none;">
+  <div class="pdf-progress-box">
+    <div class="pdf-progress-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#1D9E75" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+    </div>
+    <div class="pdf-progress-title" id="pdfProgressTitle">PDF Hazırlanıyor...</div>
+    <div class="pdf-progress-msg" id="pdfProgressMsg">Lütfen bekleyin</div>
+    <div class="pdf-progress-bar-bg">
+      <div class="pdf-progress-bar" id="pdfProgressBar"></div>
+    </div>
+    <div class="pdf-progress-step" id="pdfProgressStep"></div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- STUDENT BAR -->
+  <div class="student-bar">
+    <div class="student-left">
+      <div class="avatar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#1D9E75" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+        </svg>
+      </div>
+      <div>
+        <input class="student-name-input" type="text" id="studentName" placeholder="Öğrenci Adı Soyadı">
+        <div style="margin-top:4px;">
+          <select class="sinif-select" id="sinif">
+            <option>5. Sınıf</option><option>6. Sınıf</option><option selected>7. Sınıf</option><option>8. Sınıf</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="durum-badge">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#1D9E75" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
+      <span class="durum-label">Genel Durum</span>
+      <select class="durum-select" id="genelDurum">
+        <option>Çok İyi</option><option selected>İyi</option><option>Orta</option><option>Zayıf</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- ROW 1 -->
+  <div class="grid2">
+
+    <!-- ÖDEV -->
+    <div class="card classic-report-card">
+      <div class="card-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        1. Ödev Durumu
+      </div>
+      <div class="donut-row">
+        <div class="donut-wrap">
+          <svg viewBox="0 0 84 84">
+            <circle cx="42" cy="42" r="32" fill="none" stroke="#F3F4F6" stroke-width="9"/>
+            <circle cx="42" cy="42" r="32" fill="none" stroke="#1D9E75" stroke-width="9"
+              stroke-dasharray="201.1" id="odevArc" stroke-dashoffset="20.11" stroke-linecap="round"/>
+          </svg>
+          <div class="donut-label" id="odevPct">%90</div>
+        </div>
+        <div class="stat-lines">
+          <div class="stat-lbl" style="font-size:10px;color:#9CA3AF;">Ödev Başarı Grafiği</div>
+          <div class="stat-line">
+            <span class="stat-lbl">Başarı Yüzdesi</span>
+            <span class="stat-val" style="display:flex;align-items:center;gap:4px;">
+              <input type="number" id="odevBasari" value="90" min="0" max="100" onchange="updateOdev()">
+              <span style="color:var(--text-muted);">%</span>
+            </span>
+          </div>
+          <div class="stat-line">
+            <span class="stat-lbl">Durum</span>
+            <span class="stat-val" id="odevDurum">Çok iyi</span>
+          </div>
+        </div>
+      </div>
+      <div class="tip-box tip-good" id="odevTipBox">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        <textarea id="odevTip" rows="2">Ödevlerini düzenli tamamlıyorsun, devam et!</textarea>
+      </div>
+    </div>
+
+    <!-- KATILIM -->
+    <div class="card classic-report-card">
+      <div class="card-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        2. Derse Katılım
+      </div>
+      <div class="donut-row">
+        <div class="donut-wrap">
+          <svg viewBox="0 0 84 84">
+            <circle cx="42" cy="42" r="32" fill="none" stroke="#F3F4F6" stroke-width="9"/>
+            <circle cx="42" cy="42" r="32" fill="none" stroke="#1D9E75" stroke-width="9"
+              stroke-dasharray="201.1" id="katArc" stroke-dashoffset="30.165" stroke-linecap="round"/>
+          </svg>
+          <div class="donut-label">
+            <input type="number" id="katPct" value="85" min="0" max="100"
+              style="font-family:'Nunito',sans-serif;font-size:19px;font-weight:700;border:none;background:transparent;outline:none;width:66px;text-align:center;color:var(--text);" onchange="updateKat()">
+            <span class="donut-sub">Katılım %</span>
+          </div>
+        </div>
+        <div class="kat-list">
+          <div class="stat-lbl" style="font-size:10px;color:#9CA3AF;margin-bottom:2px;">Katılım Oranı Detayı</div>
+          <div class="kat-item">
+            <span class="kat-item-left">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              Derse Katılım
+            </span>
+            <select class="sev-select sev-iyi" onchange="colorSelect(this)">
+              <option>İyi</option><option>Orta</option><option>Zayıf</option>
+            </select>
+          </div>
+          <div class="kat-item">
+            <span class="kat-item-left">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              Soru Sorma
+            </span>
+            <select class="sev-select sev-orta" onchange="colorSelect(this)">
+              <option>İyi</option><option selected>Orta</option><option>Zayıf</option>
+            </select>
+          </div>
+          <div class="kat-item">
+            <span class="kat-item-left">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+              Derse Hazırlık
+            </span>
+            <select class="sev-select sev-iyi" onchange="colorSelect(this)">
+              <option selected>İyi</option><option>Orta</option><option>Zayıf</option>
+            </select>
+          </div>
+          <div class="kat-item">
+            <span class="kat-item-left">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="10" r="3"/><path d="M7 20.662V19a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1.662"/></svg>
+              Dikkat ve İlgi
+            </span>
+            <select class="sev-select sev-iyi" onchange="colorSelect(this)">
+              <option selected>İyi</option><option>Orta</option><option>Zayıf</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ROW 2 -->
+  <div class="grid2">
+
+    <!-- ÖĞRETMEN NOTU -->
+    <div class="card classic-report-card">
+      <div class="card-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        3. Öğretmen Notu
+      </div>
+      <textarea class="teacher-textarea" id="teacherNote" placeholder="Bu haftaki gözlem ve değerlendirmelerinizi buraya yazın...">Bu hafta hücre bölünmesi konusu üzerinde durduk. Konuyu iyi kavradın ve örnek sorularda başarılıydın. Grafik yorumlama sorularında dikkat hataların azaldı. Çalışmalarına bu şekilde devam etmen başarını artıracaktır.</textarea>
+      <div class="teacher-sig">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#1D9E75" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <input type="text" value="Fen Bilimleri Öğretmeni Uğur Uluyol">
+      </div>
+    </div>
+
+    <!-- KONU RAPORU -->
+    <div class="card">
+      <div class="card-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        4. Konu Raporu
+      </div>
+      <div class="konu-report">
+        <div class="konu-report-grid">
+          <div class="konu-field">
+            <label for="islenenKonu">İşlenen konu</label>
+            <input id="islenenKonu" type="text" value="Hücre Bölünmesi">
+          </div>
+          <div class="konu-field">
+            <label for="anlamaDuzeyi">Anlama düzeyi</label>
+            <select id="anlamaDuzeyi" class="konu-level">
+              <option>İyi</option>
+              <option selected>Orta</option>
+              <option>Geliştirilmeli</option>
+            </select>
+          </div>
+        </div>
+        <div class="konu-field">
+          <label for="evCalismasi">Ev çalışması</label>
+          <textarea id="evCalismasi">Konu özeti tekrar edilecek. Ardından 30 soru çözümü yapılacak ve yanlış sorular bir sonraki derste birlikte incelenecek.</textarea>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- DENEME -->
+  <div class="card" style="margin-bottom:16px;">
+    <div class="card-title">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      5. Son Deneme Sonuçları
+    </div>
+    <div class="deneme-wrap">
+      <input type="hidden" id="dogru" value="0">
+      <input type="hidden" id="yanlis" value="0">
+      <input type="hidden" id="bos" value="0">
+      <div class="chart-area">
+        <div class="chart-label" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+          <div class="chart-title-stack">
+            <span>Net Değişimi (Denemeler arası)</span>
+            <strong class="last-exam-summary">Son Deneme <b id="netVal">15</b> / 20 Net</strong>
+          </div>
+          <div style="display:flex;align-items:center;gap:7px;font-size:12px;font-family:'Nunito',sans-serif;font-weight:700;color:var(--text-muted);">
+            <span>Deneme Sayısı:</span>
+            <button onclick="denemeSayisiDegistir(-1)" style="width:24px;height:24px;border-radius:6px;border:1px solid var(--gray-border);background:var(--gray-light);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;color:var(--text);line-height:1;">−</button>
+            <span id="denemeSayisiLabel" style="min-width:16px;text-align:center;color:var(--text);">4</span>
+            <button onclick="denemeSayisiDegistir(1)" style="width:24px;height:24px;border-radius:6px;border:1px solid var(--gray-border);background:var(--gray-light);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;color:var(--text);line-height:1;">+</button>
+          </div>
+        </div>
+        <div class="chart-canvas-wrap"><canvas id="trendChart"></canvas></div>
+        <div class="deneme-net-inputs" id="denemeNetInputs"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="report-footer">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+    <input type="text" id="footerMsg" value="Düzenli çalışma ve tekrar başarıyı getirir. Hedeflerine adım adım yaklaşmaya devam et! 💪">
+  </div>
+
+</div>
+
+<script>
+// ── WEEK ──
+const wi = document.getElementById('weekInput');
+const now = new Date();
+const yr = now.getFullYear();
+const wk = Math.ceil(((now - new Date(yr, 0, 1)) / 86400000 + 1) / 7);
+wi.value = yr + '-W' + String(wk).padStart(2, '0');
+
+// ── SELECT COLOR ──
+function colorSelect(el) {
+  el.className = 'sev-select';
+  const v = el.value;
+  if (v === 'İyi') el.classList.add('sev-iyi');
+  else if (v === 'Orta') el.classList.add('sev-orta');
+  else el.classList.add('sev-zayif');
+}
+
+// ── ÖDEV ──
+function updateOdev() {
+  const input = document.getElementById('odevBasari');
+  const pct = Math.max(0, Math.min(100, parseInt(input.value) || 0));
+  input.value = pct;
+  document.getElementById('odevPct').textContent = '%' + pct;
+  const offset = 201.1 * (1 - pct / 100);
+  document.getElementById('odevArc').setAttribute('stroke-dashoffset', offset.toFixed(2));
+  updateOdevYorumu(pct);
+}
+
+function updateOdevYorumu(pct) {
+  const tipBox = document.getElementById('odevTipBox');
+  const tipInput = document.getElementById('odevTip');
+  const durumEl = document.getElementById('odevDurum');
+  let durum = 'tip-good';
+  let durumMetni = 'Çok iyi';
+  let mesaj = 'Ödevlerini düzenli ve eksiksiz tamamlıyor. Bu çalışma disiplini başarıya olumlu yansıyor.';
+
+  if (pct < 50) {
+    durum = 'tip-low';
+    durumMetni = 'Zayıf';
+    mesaj = 'Ödev takibi zayıf görünüyor. Bu hafta öncelik, eksik çalışmaların tamamlanması ve düzenli çalışma alışkanlığının kurulması olmalı.';
+  } else if (pct < 70) {
+    durum = 'tip-low';
+    durumMetni = 'Geliştirilmeli';
+    mesaj = 'Ödevlerde eksikler var. Konunun kalıcı olması için verilen çalışmaların daha düzenli tamamlanması gerekiyor.';
+  } else if (pct < 90) {
+    durum = 'tip-mid';
+    durumMetni = 'İyi';
+    mesaj = 'Ödevlerini genel olarak takip ediyor. Çalışma düzeni korunduğunda konu pekişmesi daha güçlü olacaktır.';
+  }
+
+  tipBox.className = 'tip-box ' + durum;
+  durumEl.textContent = durumMetni;
+  durumEl.className = durum === 'tip-low' ? 'stat-val red' : 'stat-val';
+  tipInput.value = mesaj;
+  tipInput.style.height = 'auto';
+  tipInput.style.height = tipInput.scrollHeight + 'px';
+}
+
+// ── KATILIM ──
+function updateKat() {
+  const pct = parseInt(document.getElementById('katPct').value) || 0;
+  const offset = 201.1 * (1 - pct / 100);
+  document.getElementById('katArc').setAttribute('stroke-dashoffset', offset.toFixed(2));
+}
+
+// ── NET ──
+function updateNet() {
+  const d = parseInt(document.getElementById('dogru').value) || 0;
+  const y = parseInt(document.getElementById('yanlis').value) || 0;
+  const net = Math.max(0, Math.min(20, Math.round((d - y / 3) * 10) / 10));
+  document.getElementById('netVal').textContent = net;
+  const offset = 201.1 * (1 - net / 20);
+  const netArcEl = document.getElementById('netArc');
+  if (netArcEl) netArcEl.setAttribute('stroke-dashoffset', Math.max(0, offset).toFixed(2));
+}
+
+// ── TREND CHART ──
+let denemeNetler = [11, 13, 14, 15];
+let chartInst = null;
+const DENEME_LIMIT = 12;
+
+function raporDenemeleri(report = {}) {
+  const values = [];
+  for (let index = 1; index <= DENEME_LIMIT; index++) {
+    const raw = report['deneme' + index];
+    if (raw === undefined || raw === null || raw === '') continue;
+    values.push(Math.round(Math.max(0, Math.min(20, parseFloat(raw) || 0))));
+  }
+  return values;
+}
+
+function denemeSayisiDegistir(delta) {
+  const yeni = denemeNetler.length + delta;
+  if (yeni < 1 || yeni > DENEME_LIMIT) return;
+  if (delta > 0) {
+    denemeNetler.push(0);
+  } else {
+    denemeNetler.pop();
+  }
+  document.getElementById('denemeSayisiLabel').textContent = denemeNetler.length;
+  renderTrend();
+}
+
+function renderTrend() {
+  const sonNet = denemeNetler.length ? Math.round(denemeNetler[denemeNetler.length - 1]) : 0;
+  document.getElementById('netVal').textContent = sonNet;
+  const netArc = document.getElementById('netArc');
+  if (netArc) {
+    const netOffset = 201.1 * (1 - sonNet / 20);
+    netArc.setAttribute('stroke-dashoffset', Math.max(0, netOffset).toFixed(2));
+  }
+
+  const ctx = document.getElementById('trendChart').getContext('2d');
+  if (chartInst) chartInst.destroy();
+  chartInst = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: denemeNetler.map((_, i) => (i + 1) + '. Deneme'),
+      datasets: [{
+        data: denemeNetler,
+        borderColor: '#1D9E75',
+        backgroundColor: 'rgba(29,158,117,0.08)',
+        pointBackgroundColor: denemeNetler.map((_, i) => i === denemeNetler.length - 1 ? '#EF9F27' : '#1D9E75'),
+        pointRadius: denemeNetler.map((_, i) => i === denemeNetler.length - 1 ? 6 : 5),
+        tension: 0.35,
+        fill: true,
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, datalabels: { display: false },
+        tooltip: { callbacks: { label: ctx => 'Net: ' + ctx.raw } } },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 10, family: 'Nunito Sans' } } },
+        y: { grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { font: { size: 10, family: 'Nunito Sans' }, stepSize: 4 }, min: 0, max: 20 }
+      }
+    }
+  });
+
+  document.getElementById('denemeSayisiLabel').textContent = denemeNetler.length;
+  const wrap = document.getElementById('denemeNetInputs');
+  wrap.innerHTML = denemeNetler.map((v, i) => `
+    <div class="dni-item ${i === denemeNetler.length - 1 ? 'dni-last' : ''}">
+      ${i + 1}. Deneme:
+      <input type="number" value="${Math.round(v)}" min="0" max="20" step="1"
+        onchange="denemeNetler[${i}]=Math.min(20,Math.max(0,parseInt(this.value,10)||0));renderTrend()">
+    </div>
+  `).join('');
+}
+
+// ── INIT ──
+updateNet();
+renderTrend();
+updateOdev();
+updateKat();
+
+// ── ÖĞRENCİ LİSTESİ ──
+const sinifler = {
+  '5-A': [], '5-B': [], '5-C': [], '5-D': [],
+  '6-A': [], '6-B': [], '6-C': [], '6-D': [],
+  '7-A': [], '7-B': [], '7-C': [], '7-D': [],
+  '8-A': [], '8-B': [], '8-C': [], '8-D': []
+};
+let aktifSinif = '5';
+const aktifSubeler = { '5': 'A', '6': 'A', '7': 'A', '8': 'A' };
+
+function aktifListeKey() {
+  return aktifSinif + '-' + aktifSubeler[aktifSinif];
+}
+
+function sinifSayisi(sinif) {
+  return ['A','B','C','D'].reduce((toplam, sube) => toplam + sinifler[sinif + '-' + sube].length, 0);
+}
+
+function sinifBaslik(sinif, sube = aktifSubeler[sinif]) {
+  return sinif + '. Sınıf ' + sube + ' Şubesi';
+}
+
+function ogrenciPin(no, ad) {
+  const parcalar = String(ad || '').trim().split(/\s+/);
+  const ilkHarf = parcalar[0]?.[0] || '';
+  const soyadHarf = parcalar.length > 1 ? parcalar[parcalar.length - 1][0] : '';
+  return (String(no || '') + ilkHarf + soyadHarf).toLocaleUpperCase('tr-TR');
+}
+
+function otomatikOgrenciNo(key) {
+  return key.replace('-', '') + String(sinifler[key].length + 1).padStart(3, '0');
+}
+
+function ogrenciSatiriCoz(satir, key) {
+  const temiz = satir.replace(/^\d+[\.\)-]\s*/, '').replace(/\s+/g, ' ').trim();
+  const eslesme = temiz.match(/^(\d{2,})\s+(.+)$/);
+  if (eslesme) return { no: eslesme[1], ad: eslesme[2].trim() };
+  return { no: otomatikOgrenciNo(key), ad: temiz };
+}
+
+function ogrenciKaydi(ogrenci) {
+  if (typeof ogrenci === 'string') {
+    return { no: '', ad: ogrenci };
+  }
+  return ogrenci;
+}
+
+function panelAc() {
+  document.getElementById('panelOverlay').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  renderOgrenciGrid();
+}
+function panelKapat() {
+  document.getElementById('panelOverlay').style.display = 'none';
+  document.body.style.overflow = '';
+}
+function panelOverlayClick(e) {
+  if (e.target === document.getElementById('panelOverlay')) panelKapat();
+}
+
+function tabSec(sinif) {
+  aktifSinif = sinif;
+  ['5','6','7','8'].forEach(s => {
+    document.getElementById('tab' + s).classList.toggle('active', s === sinif);
+  });
+  const ekleSelect = document.getElementById('eklenecekSinif');
+  if (ekleSelect) ekleSelect.value = sinif;
+  subeAlanlariniGuncelle();
+  document.getElementById('topluInput').value = '';
+  document.getElementById('topluResult').textContent = '';
+  const cnt = sinifler[aktifListeKey()].length;
+  document.getElementById('pdfTopluLabel').textContent = sinifBaslik(sinif) + ' — Toplu PDF';
+  document.getElementById('pdfTopluCount').textContent = cnt + ' öğrenci';
+  renderOgrenciGrid();
+}
+
+function subeAlanlariniGuncelle() {
+  const ekleWrap = document.getElementById('eklenecekSubeWrap');
+  const listeRow = document.getElementById('subeListRow');
+  if (ekleWrap) ekleWrap.classList.remove('sube-hidden');
+  if (listeRow) listeRow.classList.remove('sube-hidden');
+  const ekleSube = document.getElementById('eklenecekSube');
+  const aktifSube = document.getElementById('aktifSube');
+  if (ekleSube) ekleSube.value = aktifSubeler[aktifSinif];
+  if (aktifSube) aktifSube.value = aktifSubeler[aktifSinif];
+}
+
+function subeSec(sube) {
+  aktifSubeler[aktifSinif] = sube;
+  subeAlanlariniGuncelle();
+  document.getElementById('topluResult').textContent = '';
+  renderOgrenciGrid();
+  guncelBadge();
+}
+
+function topluEkle() {
+  const raw = document.getElementById('topluInput').value;
+  const hedefSinif = document.getElementById('eklenecekSinif')?.value || aktifSinif;
+  const hedefSube = document.getElementById('eklenecekSube')?.value || aktifSubeler[hedefSinif];
+  const hedefKey = hedefSinif + '-' + hedefSube;
+  const satirlar = raw.split('\n')
+    .map(s => s.trim())
+    .filter(s => s.length > 0);
+
+  if (satirlar.length === 0) {
+    document.getElementById('topluResult').textContent = 'Lütfen en az bir isim girin.';
+    return;
+  }
+
+  let eklenen = 0;
+  satirlar.forEach(satir => {
+    const ogrenci = ogrenciSatiriCoz(satir, hedefKey);
+    const ayniKayitVar = sinifler[hedefKey].some(kayit => {
+      const mevcut = ogrenciKaydi(kayit);
+      return mevcut.no === ogrenci.no || mevcut.ad.toLocaleLowerCase('tr-TR') === ogrenci.ad.toLocaleLowerCase('tr-TR');
+    });
+    if (ogrenci.ad && !ayniKayitVar) {
+      sinifler[hedefKey].push(ogrenci);
+      eklenen++;
+    }
+  });
+
+  document.getElementById('topluInput').value = '';
+  aktifSubeler[hedefSinif] = hedefSube;
+  if (hedefSinif !== aktifSinif) tabSec(hedefSinif);
+  else {
+    subeAlanlariniGuncelle();
+    renderOgrenciGrid();
+  }
+  document.getElementById('topluResult').textContent = eklenen + ' öğrenci ' + sinifBaslik(hedefSinif, hedefSube) + ' listesine eklendi.';
+  renderOgrenciGrid();
+  guncelBadge();
+}
+
+function ogrenciSil(sinif, index) {
+  const key = aktifListeKey();
+  sinifler[key].splice(index, 1);
+  renderOgrenciGrid();
+  guncelBadge();
+}
+
+function ogrenciDuzenle(sinif, index, yeniAd) {
+  const key = aktifListeKey();
+  const mevcut = ogrenciKaydi(sinifler[key][index]);
+  sinifler[key][index] = { ...mevcut, ad: yeniAd };
+  renderOgrenciGrid();
+}
+
+function ogrenciNoDuzenle(sinif, index, yeniNo) {
+  const key = aktifListeKey();
+  const mevcut = ogrenciKaydi(sinifler[key][index]);
+  sinifler[key][index] = { ...mevcut, no: yeniNo.trim() };
+  renderOgrenciGrid();
+}
+
+function ogrenciSec(ad, sinif) {
+  const ogrenci = ogrenciKaydi(ad);
+  document.getElementById('studentName').value = ogrenci.ad;
+  const sinifMap = { '5': '5. Sınıf', '6': '6. Sınıf', '7': '7. Sınıf', '8': '8. Sınıf' };
+  const sel = document.getElementById('sinif');
+  for (let i = 0; i < sel.options.length; i++) {
+    if (sel.options[i].text === sinifMap[sinif]) {
+      sel.selectedIndex = i;
+      break;
+    }
+  }
+  panelKapat();
+}
+
+function ogrenciSecIndex(index) {
+  const key = aktifListeKey();
+  ogrenciSec(sinifler[key][index], aktifSinif);
+}
+
+function sinifTemizle() {
+  const key = aktifListeKey();
+  if (sinifler[key].length === 0) return;
+  if (confirm(sinifBaslik(aktifSinif) + ' listesindeki tüm öğrenciler silinecek. Emin misiniz?')) {
+    sinifler[key] = [];
+    renderOgrenciGrid();
+    guncelBadge();
+  }
+}
+
+function renderOgrenciGrid() {
+  subeAlanlariniGuncelle();
+  const key = aktifListeKey();
+  const liste = sinifler[key];
+  const grid = document.getElementById('ogrenciGrid');
+  const label = document.getElementById('listLabel');
+  label.textContent = sinifBaslik(aktifSinif) + ' — ' + liste.length + ' öğrenci';
+
+  // tab counts
+  ['5','6','7','8'].forEach(s => {
+    document.getElementById('cnt' + s).textContent = sinifSayisi(s);
+  });
+
+  if (liste.length === 0) {
+    grid.innerHTML = `
+      <div class="ogrenci-empty" style="grid-column:1/-1;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Henüz öğrenci eklenmedi.<br>Yukarıdan toplu ekleyebilirsiniz.
+      </div>`;
+    return;
+  }
+
+  grid.innerHTML = liste.map((kayit, i) => {
+    const ogrenci = ogrenciKaydi(kayit);
+    const no = ogrenci.no || otomatikOgrenciNo(key);
+    const pin = ogrenciPin(no, ogrenci.ad);
+    return `
+    <div class="ogrenci-item">
+      <span class="ogrenci-item-no">${i + 1}</span>
+      <input class="ogrenci-no-input" type="text" value="${escHtml(no)}"
+        onchange="ogrenciNoDuzenle('${aktifSinif}',${i},this.value)" title="Öğrenci numarası">
+      <input class="ogrenci-item-input" type="text" value="${escHtml(ogrenci.ad)}"
+        onchange="ogrenciDuzenle('${aktifSinif}',${i},this.value)">
+      <span class="ogrenci-pin">PIN ${escHtml(pin)}</span>
+      <button class="ogrenci-item-secbtn" onclick="ogrenciSecIndex(${i})">Seç</button>
+      <button class="ogrenci-item-delbtn" onclick="ogrenciSil('${aktifSinif}',${i})" title="Sil">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+  `}).join('');
+}
+
+function guncelBadge() {
+  const toplam = Object.values(sinifler).reduce((a, b) => a + b.length, 0);
+  document.getElementById('totalBadge').textContent = toplam;
+  // PDF toplu buton güncelle
+  const cnt = sinifler[aktifListeKey()].length;
+  document.getElementById('pdfTopluLabel').textContent = sinifBaslik(aktifSinif) + ' — Toplu PDF';
+  document.getElementById('pdfTopluCount').textContent = cnt + ' öğrenci';
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ── PDF FONKSİYONLARI ──
+
+function raporDomAl() {
+  return document.querySelector('.main');
+}
+
+function ogrenciAyarla(ad, sinifNo) {
+  document.getElementById('studentName').value = ad;
+  const sinifMap = { '5': '5. Sınıf', '6': '6. Sınıf', '7': '7. Sınıf', '8': '8. Sınıf' };
+  const sel = document.getElementById('sinif');
+  for (let i = 0; i < sel.options.length; i++) {
+    if (sel.options[i].text === sinifMap[sinifNo]) { sel.selectedIndex = i; break; }
+  }
+}
+
+async function raporPdfOlustur(adSoyad, dosyaAdi) {
+  const el = raporDomAl();
+  // Geçici olarak tüm input/textarea değerlerini data attribute'a yaz (html2canvas için)
+  el.querySelectorAll('input[type=text], input[type=number], textarea').forEach(inp => {
+    inp.setAttribute('data-val', inp.value);
+  });
+
+  const canvas = await html2canvas(el, {
+    scale: 2,
+    useCORS: true,
+    logging: false,
+    backgroundColor: '#F8FAF9',
+    onclone: (doc) => {
+      // Klonlanmış DOM'da inputları span'a çevirerek görünür yap
+      doc.querySelectorAll('input[type=text], input[type=number]').forEach(inp => {
+        const span = doc.createElement('span');
+        span.textContent = inp.getAttribute('data-val') || inp.value || inp.getAttribute('value') || '';
+        span.style.cssText = inp.style.cssText;
+        span.style.display = 'inline';
+        inp.replaceWith(span);
+      });
+      doc.querySelectorAll('textarea').forEach(ta => {
+        const div = doc.createElement('div');
+        div.textContent = ta.getAttribute('data-val') || ta.value || '';
+        div.style.cssText = window.getComputedStyle(ta).cssText;
+        div.style.whiteSpace = 'pre-wrap';
+        ta.replaceWith(div);
+      });
+    }
+  });
+
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+  const pgW = pdf.internal.pageSize.getWidth();
+  const pgH = pdf.internal.pageSize.getHeight();
+  const imgW = pgW;
+  const imgH = (canvas.height * pgW) / canvas.width;
+
+  let yPos = 0;
+  while (yPos < imgH) {
+    if (yPos > 0) pdf.addPage();
+    pdf.addImage(canvas, 'PNG', 0, -yPos, imgW, imgH);
+    yPos += pgH;
+  }
+
+  pdf.save(dosyaAdi);
+}
+
+async function pdfTekOgrenci() {
+  const ad = document.getElementById('studentName').value.trim() || 'Öğrenci';
+  const sinif = document.getElementById('sinif').value;
+  const dosya = ad.replace(/\s+/g, '_') + '_' + sinif.replace(/\./g,'').replace(/\s/g,'') + '_Rapor.pdf';
+
+  pdfProgressGoster('PDF Oluşturuluyor', ad + ' için rapor hazırlanıyor...', 50, '1/1');
+  try {
+    await raporPdfOlustur(ad, dosya);
+    pdfProgressGoster('Tamamlandı!', dosya + ' indirildi.', 100, '✓');
+    setTimeout(() => pdfProgressGizle(), 1500);
+  } catch(e) {
+    pdfProgressGizle();
+    alert('PDF oluşturulurken hata: ' + e.message);
+  }
+}
+
+async function pdfSinifToplu() {
+  const liste = sinifler[aktifListeKey()];
+  if (liste.length === 0) {
+    alert(sinifBaslik(aktifSinif) + ' listesinde öğrenci yok. Önce öğrenci ekleyin.');
+    return;
+  }
+
+  // Mevcut öğrenci ve sınıfı kaydet
+  const eskiAd = document.getElementById('studentName').value;
+  const eskiSinifIdx = document.getElementById('sinif').selectedIndex;
+
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+  const pgW = pdf.internal.pageSize.getWidth();
+  const pgH = pdf.internal.pageSize.getHeight();
+
+  panelKapat();
+
+  for (let i = 0; i < liste.length; i++) {
+    const ogrenci = ogrenciKaydi(liste[i]);
+    const ad = ogrenci.ad;
+    const pct = Math.round(((i) / liste.length) * 100);
+    pdfProgressGoster(
+      sinifBaslik(aktifSinif) + ' Toplu PDF',
+      `${i + 1}/${liste.length} — ${ad}`,
+      pct,
+      `${i + 1} / ${liste.length} öğrenci`
+    );
+
+    ogrenciAyarla(ad, aktifSinif);
+    // DOM güncellemesinin render edilmesi için kısa bekleme
+    await new Promise(r => setTimeout(r, 120));
+
+    const el = raporDomAl();
+    el.querySelectorAll('input[type=text], input[type=number], textarea').forEach(inp => {
+      inp.setAttribute('data-val', inp.value);
+    });
+
+    const canvas = await html2canvas(el, {
+      scale: 2, useCORS: true, logging: false, backgroundColor: '#F8FAF9',
+      onclone: (doc) => {
+        doc.querySelectorAll('input[type=text], input[type=number]').forEach(inp => {
+          const span = doc.createElement('span');
+          span.textContent = inp.getAttribute('data-val') || inp.value || inp.getAttribute('value') || '';
+          span.style.cssText = inp.style.cssText;
+          span.style.display = 'inline';
+          inp.replaceWith(span);
+        });
+        doc.querySelectorAll('textarea').forEach(ta => {
+          const div = doc.createElement('div');
+          div.textContent = ta.getAttribute('data-val') || ta.value || '';
+          div.style.cssText = window.getComputedStyle(ta).cssText;
+          div.style.whiteSpace = 'pre-wrap';
+          ta.replaceWith(div);
+        });
+      }
+    });
+
+    const imgW = pgW;
+    const imgH = (canvas.height * pgW) / canvas.width;
+
+    if (i > 0) pdf.addPage();
+    let yPos = 0;
+    while (yPos < imgH) {
+      if (yPos > 0) pdf.addPage();
+      pdf.addImage(canvas, 'PNG', 0, -yPos, imgW, imgH);
+      yPos += pgH;
+    }
+  }
+
+  pdfProgressGoster('Kaydediliyor...', 'PDF dosyası indiriliyor', 95, 'Son adım');
+  const sinifAdi = aktifSinif + '_' + aktifSubeler[aktifSinif] + '_Subesi';
+  pdf.save(sinifAdi + '_Tum_Ogrenciler_Rapor.pdf');
+
+  // Eski öğrenciyi geri yükle
+  document.getElementById('studentName').value = eskiAd;
+  document.getElementById('sinif').selectedIndex = eskiSinifIdx;
+
+  pdfProgressGoster('Tamamlandı!', liste.length + ' öğrencinin raporu tek PDF olarak indirildi.', 100, '✓');
+  setTimeout(() => pdfProgressGizle(), 2000);
+}
+
+function pdfProgressGoster(baslik, mesaj, pct, adim) {
+  document.getElementById('pdfProgressTitle').textContent = baslik;
+  document.getElementById('pdfProgressMsg').textContent = mesaj;
+  document.getElementById('pdfProgressBar').style.width = pct + '%';
+  document.getElementById('pdfProgressStep').textContent = adim;
+  document.getElementById('pdfProgressOverlay').style.display = 'flex';
+}
+
+function pdfProgressGizle() {
+  document.getElementById('pdfProgressOverlay').style.display = 'none';
+}
+
+function googleSheetsVerisiniUygula() {
+  const params = new URLSearchParams(window.location.search);
+  const previewRaw = params.get('preview');
+  const raw = previewRaw ? decodeURIComponent(previewRaw) : sessionStorage.getItem('currentReport');
+  if (!raw) return;
+
+  try {
+    const report = JSON.parse(raw);
+    const setValue = (id, value) => {
+      const el = document.getElementById(id);
+      if (el && value !== undefined && value !== null && value !== '') el.value = value;
+    };
+
+    setValue('studentName', report.adSoyad);
+
+    const sinif = String(report.sinif || '').trim();
+    const sinifSelect = document.getElementById('sinif');
+    if (sinifSelect && sinif) {
+      [...sinifSelect.options].forEach((option, index) => {
+        if (option.text.startsWith(sinif + '.')) sinifSelect.selectedIndex = index;
+      });
+    }
+
+    setValue('odevBasari', report.odevYuzde);
+    setValue('katPct', report.katilimYuzde);
+    setValue('islenenKonu', report.islenenKonu);
+    setValue('anlamaDuzeyi', report.anlamaDuzeyi);
+    setValue('evCalismasi', report.evCalismasi);
+    setValue('dogru', report.dogru);
+    setValue('yanlis', report.yanlis);
+    setValue('bos', report.bos);
+    setValue('teacherNote', report.ogretmenNotu);
+
+    const denemeler = raporDenemeleri(report);
+    if (denemeler.length) denemeNetler = denemeler;
+
+    updateOdev();
+    updateKat();
+    updateNet();
+    renderTrend();
+  } catch (error) {
+    console.warn('Google Sheets verisi rapora uygulanamadı.', error);
+  }
+}
+
+function veliModuHazirla() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('veli') !== '1') return;
+
+  document.body.classList.add('veli-mode');
+  document.querySelectorAll('input, textarea').forEach(el => {
+    el.readOnly = true;
+    el.tabIndex = -1;
+  });
+  document.querySelectorAll('select, button').forEach(el => {
+    el.disabled = true;
+    el.tabIndex = -1;
+  });
+}
+
+googleSheetsVerisiniUygula();
+veliModuHazirla();
+</script>
+</body>
+</html>
+
+
+
+
+

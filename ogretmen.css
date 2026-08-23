@@ -1,0 +1,616 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --green: #1D9E75;
+  --green-light: #E1F5EE;
+  --green-mid: #9DDDC8;
+  --green-dark: #0F6E56;
+  --amber: #EF9F27;
+  --amber-light: #FFF4DE;
+  --amber-dark: #B7791F;
+  --red: #E45757;
+  --gray: #9CA3AF;
+  --gray-light: #F3F6F5;
+  --gray-border: #E2E8E6;
+  --text: #1F2937;
+  --text-muted: #6B7280;
+  --text-hint: #9CA3AF;
+  --bg: #F8FAF9;
+  --card: #FFFFFF;
+  --radius: 12px;
+  --radius-sm: 8px;
+}
+
+body {
+  font-family: "Nunito Sans", "Segoe UI", Arial, sans-serif;
+  font-size: 17px;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+button, input, select, textarea { font: inherit; }
+button { cursor: pointer; }
+
+.teacher-lock {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background:
+    linear-gradient(135deg, rgba(15, 110, 86, 0.94), rgba(31, 41, 55, 0.86)),
+    var(--bg);
+}
+
+.teacher-lock.hidden { display: none; }
+
+.teacher-lock-card {
+  width: min(390px, 100%);
+  display: grid;
+  gap: 11px;
+  background: var(--card);
+  border: 1px solid var(--gray-border);
+  border-radius: 16px;
+  padding: 28px;
+  box-shadow: 0 24px 70px rgba(31, 41, 55, 0.22);
+}
+
+.teacher-lock-card .lock-icon {
+  margin-bottom: 4px;
+}
+
+.teacher-lock-card p {
+  margin: 0;
+  color: var(--green);
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.teacher-lock-card h1 {
+  margin: 0 0 8px;
+  font-family: "Nunito", sans-serif;
+  font-size: 26px;
+}
+
+.teacher-lock-card label {
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.teacher-lock-card input {
+  height: 48px;
+  border: 1px solid var(--gray-border);
+  border-radius: var(--radius-sm);
+  background: var(--gray-light);
+  padding: 0 12px;
+  outline: none;
+}
+
+.teacher-lock-card button {
+  min-height: 46px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: var(--green);
+  color: #fff;
+  font-family: "Nunito", sans-serif;
+  font-weight: 800;
+}
+
+.teacher-lock-card strong {
+  min-height: 18px;
+  color: #B83232;
+  font-size: 13px;
+}
+
+.topbar {
+  background: var(--card);
+  border-bottom: 1px solid var(--gray-border);
+  padding: 0 24px;
+  height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.topbar-brand { display: flex; align-items: center; gap: 10px; min-width: 230px; }
+.brand-icon {
+  width: 36px; height: 36px; background: var(--green-light);
+  border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center;
+}
+.brand-icon svg { width: 22px; height: 22px; }
+.brand-name { font-family: "Nunito", sans-serif; font-size: 15px; font-weight: 700; color: var(--green-dark); line-height: 1.1; }
+.brand-sub { font-size: 10px; font-weight: 500; color: var(--text-muted); letter-spacing: 0.05em; }
+.topbar-title { font-family: "Nunito", sans-serif; font-size: 16px; font-weight: 700; color: var(--text); letter-spacing: 0.02em; }
+.topbar-right { display: flex; align-items: center; justify-content: flex-end; gap: 10px; min-width: 320px; }
+
+input[type="week"],
+.btn-save-top,
+.btn-ogrenci-listesi,
+.btn-logout {
+  font-family: "Nunito", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  border: 1px solid var(--gray-border);
+  border-radius: var(--radius-sm);
+  padding: 6px 12px;
+  background: var(--gray-light);
+  color: var(--text-muted);
+  outline: none;
+}
+
+.btn-save-top,
+.btn-ogrenci-listesi,
+.btn-logout {
+  color: var(--green-dark);
+  background: var(--card);
+  border: 1.5px solid var(--green-mid);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-save-top:hover,
+.btn-ogrenci-listesi:hover { background: var(--green-light); }
+.btn-logout {
+  color: #B83232;
+  border-color: #F7C1C1;
+}
+.btn-logout:hover { background: var(--red-light); }
+.total-badge { font-size: 10px; background: var(--green); color: #fff; border-radius: 10px; padding: 1px 7px; }
+
+.status-bar {
+  width: min(900px, calc(100% - 32px));
+  margin: 12px auto 0;
+  padding: 9px 12px;
+  border: 1px solid var(--green-mid);
+  border-radius: var(--radius-sm);
+  background: var(--green-light);
+  color: var(--green-dark);
+  font-family: "Nunito", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+}
+.status-bar.error {
+  border-color: #F7C1C1;
+  background: var(--red-light);
+  color: #B83232;
+}
+
+.main { max-width: 900px; margin: 0 auto; padding: 24px 16px 48px; }
+
+.student-bar {
+  background: var(--card);
+  border: 1px solid var(--gray-border);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 16px;
+}
+
+.student-left { display: flex; align-items: center; gap: 14px; flex: 1 1 auto; min-width: 0; }
+.avatar {
+  width: 48px; height: 48px; border-radius: 50%;
+  background: var(--green-light); display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.avatar svg { width: 26px; height: 26px; }
+.student-fields { min-width: 0; width: min(540px, 100%); }
+.student-name-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.student-name-input {
+  font-family: "Nunito", sans-serif; font-size: 17px; font-weight: 700;
+  color: var(--text); border: none; background: transparent; outline: none;
+  border-bottom: 1.5px dashed var(--gray-border); width: 100%; padding-bottom: 2px;
+}
+.main-viewed-badge {
+  width: fit-content;
+  margin-top: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  background: var(--green-light);
+  color: var(--green-dark);
+  border: 1px solid var(--green-mid);
+  padding: 3px 9px;
+  font-family: "Nunito", sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+}
+.main-viewed-badge.hidden { display: none; }
+.student-meta-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+.student-no-input,
+.sinif-select {
+  font-family: "Nunito Sans", sans-serif; font-size: 13px;
+  border: 1px solid var(--gray-border); border-radius: 6px;
+  padding: 5px 8px; background: var(--gray-light); color: var(--text-muted); outline: none;
+}
+.student-no-input { width: 112px; }
+.sinif-select { width: 74px; }
+
+.durum-box {
+  background: var(--green-light);
+  border-radius: var(--radius-sm);
+  padding: 8px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.durum-box span { font-size: 12px; color: var(--green-dark); }
+.durum-select {
+  font-family: "Nunito", sans-serif; font-size: 14px; font-weight: 700;
+  color: var(--green-dark); border: none; background: transparent; outline: none; cursor: pointer;
+}
+
+.status-select-good {
+  color: var(--green-dark) !important;
+  background: var(--green-light) !important;
+  border-color: var(--green-mid) !important;
+}
+
+.status-select-mid {
+  color: var(--amber-dark) !important;
+  background: var(--amber-light) !important;
+  border-color: #FAC775 !important;
+}
+
+.status-select-low {
+  color: #B83232 !important;
+  background: #FDECEC !important;
+  border-color: #F7C1C1 !important;
+}
+
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--gray-border);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+}
+
+.card-title {
+  display: flex; align-items: center; gap: 8px;
+  font-family: "Nunito", sans-serif; font-size: 17px; font-weight: 700;
+  color: var(--text); margin-bottom: 14px;
+}
+.card-title svg { width: 20px; height: 20px; color: var(--green); flex-shrink: 0; }
+
+.odev-layout,
+.kat-layout { display: flex; align-items: center; gap: 18px; }
+
+.donut-wrap { width: 92px; height: 92px; position: relative; flex-shrink: 0; }
+.donut-wrap.small { width: 92px; height: 92px; }
+.donut { width: 100%; height: 100%; transform: rotate(-90deg); }
+.donut-label {
+  position: absolute; inset: 0; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; text-align: center;
+  font-family: "Nunito", sans-serif; color: var(--text);
+}
+.donut-label span { font-size: 11px; color: var(--text-muted); }
+.donut-label input {
+  width: 66px; border: none; background: transparent; text-align: center;
+  font-family: "Nunito", sans-serif; font-size: 19px; font-weight: 700; color: var(--text); outline: none;
+}
+#participationInput { width: 70px; }
+#homeworkDisplay { font-size: 19px; color: var(--text); font-weight: 700; }
+#netPreview { font-size: 14px; line-height: 1; }
+
+.odev-info { flex: 1; min-width: 0; }
+.mini-label { font-size: 13px; color: var(--text-muted); margin-bottom: 5px; }
+.inline-number {
+  display: grid; gap: 3px; font-size: 14px; color: var(--text-muted); margin-bottom: 8px;
+}
+.inline-number input {
+  width: 58px; border: none; border-bottom: 1px dashed var(--gray-border);
+  background: transparent; color: var(--green); font-family: "Nunito", sans-serif;
+  font-weight: 700; outline: none; text-align: center;
+}
+#homeworkText { font-family: "Nunito", sans-serif; font-size: 16px; }
+.homework-status {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  min-height: 24px;
+  padding: 3px 9px;
+  border-radius: 6px;
+  border: 1px solid var(--gray-border);
+  background: var(--gray-light);
+  color: var(--text-muted);
+}
+.homework-status.status-select-good,
+.homework-status.status-select-mid,
+.homework-status.status-select-low {
+  border-width: 1px;
+}
+.tip-box {
+  display: flex; align-items: flex-start; gap: 8px; background: var(--green-light);
+  border-radius: var(--radius-sm); padding: 8px 12px; margin-top: 12px;
+  color: var(--green-dark); font-size: 14px; line-height: 1.4;
+}
+
+.kat-details { flex: 1; display: grid; gap: 7px; }
+.kat-details label {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  font-size: 14px; color: var(--text-muted);
+}
+.kat-details select {
+  font-family: "Nunito", sans-serif; font-size: 14px; font-weight: 700;
+  border: 1px solid var(--green-mid); border-radius: 6px;
+  padding: 3px 8px; background: var(--green-light); color: var(--green-dark); outline: none;
+}
+
+.teacher-textarea {
+  width: 100%; min-height: 132px;
+  font-family: "Nunito Sans", sans-serif; font-size: 16px; color: var(--text); line-height: 1.6;
+  border: 1px solid var(--gray-border); border-radius: var(--radius-sm);
+  padding: 10px 12px; background: var(--gray-light); resize: vertical; outline: none;
+}
+.teacher-textarea:focus { border-color: var(--green-mid); }
+.teacher-sig { display: flex; align-items: center; gap: 6px; margin-top: 10px; color: var(--green); }
+.teacher-sig input {
+  font-size: 15px; color: var(--green-dark); border: none; background: transparent; outline: none;
+  border-bottom: 1px dashed var(--green-mid); flex: 1 1 auto; min-width: 0;
+}
+
+.konu-report-grid { display: grid; grid-template-columns: 1fr 150px; gap: 10px; }
+.konu-field { display: grid; gap: 5px; font-family: "Nunito", sans-serif; font-size: 13px; font-weight: 700; color: var(--text-muted); }
+.konu-wide { grid-column: 1 / -1; }
+.konu-field input,
+.konu-field select,
+.konu-field textarea {
+  width: 100%; font-size: 16px; color: var(--text); border: 1px solid var(--gray-border);
+  border-radius: var(--radius-sm); background: var(--gray-light); outline: none;
+  padding: 9px 10px; resize: vertical;
+}
+.konu-field select {
+  font-family: "Nunito", sans-serif; font-weight: 700; color: var(--green-dark);
+  background: var(--green-light); border-color: var(--green-mid);
+}
+
+.deneme-card { margin-bottom: 16px; }
+.deneme-wrap { display: flex; gap: 20px; align-items: flex-start; }
+.deneme-left { display: flex; flex-direction: column; align-items: center; gap: 8px; width: 120px; flex-shrink: 0; }
+.deneme-inputs { display: flex; flex-direction: column; gap: 6px; width: 100%; }
+.di-row { display: grid; grid-template-columns: 12px 1fr 48px; align-items: center; gap: 7px; font-size: 13px; color: var(--text-muted); }
+.dot { width: 10px; height: 10px; border-radius: 50%; }
+.dot-g { background: var(--green); }
+.dot-r { background: var(--red); }
+.dot-gr { background: var(--gray); }
+.di-row input {
+  width: 48px; border: 1px solid var(--gray-border); border-radius: 6px;
+  padding: 3px 6px; text-align: center; background: var(--gray-light); outline: none;
+  font-family: "Nunito", sans-serif; font-size: 13px; font-weight: 700; color: var(--text);
+}
+.chart-area { flex: 1; min-width: 0; }
+.chart-label {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;
+  font-size: 13px; color: var(--text-muted); margin-bottom: 8px;
+}
+.chart-title-stack { display: grid; gap: 3px; }
+.last-exam-summary {
+  width: fit-content;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  color: var(--text-muted);
+  font-family: "Nunito Sans", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+}
+.last-exam-summary b {
+  font-family: "Nunito", sans-serif;
+  font-size: 14px;
+  color: var(--text);
+  font-weight: 800;
+}
+.deneme-count-control {
+  display: flex; align-items: center; gap: 7px;
+  font-family: "Nunito", sans-serif; font-size: 14px; font-weight: 700; color: var(--text-muted);
+}
+.deneme-count-control button {
+  width: 24px; height: 24px; border-radius: 6px;
+  border: 1px solid var(--gray-border); background: var(--gray-light);
+  color: var(--text); display: inline-flex; align-items: center; justify-content: center;
+}
+.deneme-count-control strong {
+  min-width: 16px; text-align: center; color: var(--text);
+}
+.chart-canvas-wrap { height: 110px; }
+.deneme-net-inputs { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.deneme-net-inputs span { display: flex; align-items: center; gap: 4px; font-size: 13px; color: var(--text-muted); }
+.deneme-net-inputs input {
+  width: 42px; border: 1px solid var(--gray-border); border-radius: 4px;
+  padding: 2px 4px; text-align: center; background: var(--gray-light); outline: none; color: var(--text);
+  font-size: 13px;
+}
+
+.report-footer {
+  border-top: 1px solid var(--gray-border);
+  padding-top: 14px; display: flex; align-items: center; justify-content: center; gap: 6px;
+  color: var(--green); margin-bottom: 14px;
+}
+.report-footer input {
+  width: min(520px, 100%); border: none; background: transparent; outline: none;
+  color: var(--text-muted); font-size: 12px; text-align: center;
+}
+
+.save-bar {
+  background: var(--card); border: 1px solid var(--gray-border); border-radius: var(--radius);
+  padding: 12px 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  position: sticky; bottom: 12px; box-shadow: 0 10px 30px rgba(31,41,55,0.08);
+}
+#saveInfo { color: var(--text-muted); font-size: 12px; }
+.save-bar div { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.btn-primary,
+.btn-secondary {
+  font-family: "Nunito", sans-serif; font-size: 12px; font-weight: 700;
+  border-radius: var(--radius-sm); padding: 8px 14px; border: 1.5px solid var(--green-mid);
+}
+.btn-primary { background: var(--green); color: #fff; border-color: var(--green); }
+.btn-primary:hover { background: var(--green-dark); }
+.btn-secondary { background: var(--card); color: var(--green-dark); }
+.btn-secondary:hover { background: var(--green-light); }
+
+.panel-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.35);
+  z-index: 200; display: flex; align-items: center; justify-content: center; padding: 16px;
+}
+.panel-overlay.hidden { display: none; }
+.ogrenci-panel {
+  background: var(--card); border-radius: 16px; width: min(720px, 100%);
+  max-height: 88vh; display: flex; flex-direction: column; box-shadow: 0 20px 60px rgba(0,0,0,0.18);
+  overflow: hidden;
+}
+.panel-header {
+  padding: 18px 22px; border-bottom: 1px solid var(--gray-border);
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+}
+.panel-title { font-family: "Nunito", sans-serif; font-size: 16px; font-weight: 700; color: var(--text); }
+.panel-sub { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
+.panel-close {
+  width: 36px; height: 36px; border: 1px solid var(--gray-border); border-radius: var(--radius-sm);
+  background: var(--gray-light); color: var(--text-muted); font-size: 22px; line-height: 1;
+}
+.panel-body { padding: 18px 22px; overflow-y: auto; }
+.class-tabs {
+  display: flex; gap: 0; margin: -18px -22px 18px;
+  padding: 0 22px; background: var(--gray-light); border-bottom: 1px solid var(--gray-border);
+}
+.panel-tab {
+  font-family: "Nunito", sans-serif; font-size: 13px; font-weight: 700;
+  padding: 12px 18px; cursor: pointer; border: none; background: transparent;
+  color: var(--text-muted); border-bottom: 2.5px solid transparent;
+  margin-bottom: -1px; display: flex; align-items: center; gap: 7px;
+}
+.panel-tab.active { color: var(--green-dark); border-bottom-color: var(--green); background: var(--card); }
+.tab-count {
+  font-size: 10px; background: var(--green-light); color: var(--green-dark);
+  border-radius: 10px; padding: 1px 7px; font-weight: 700;
+}
+.panel-tab.active .tab-count { background: var(--green); color: #fff; }
+.toplu-ekle-area {
+  background: var(--gray-light); border: 1.5px dashed var(--gray-border);
+  border-radius: var(--radius); padding: 14px 16px; margin-bottom: 14px;
+}
+.toplu-title {
+  font-family: "Nunito", sans-serif; font-size: 13px; font-weight: 700;
+  color: var(--text); margin-bottom: 8px;
+}
+.toplu-controls {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  background: var(--card); border: 1px solid var(--gray-border);
+  border-radius: var(--radius-sm); padding: 9px 10px; margin-bottom: 10px;
+}
+.toplu-controls label,
+.display-row label {
+  display: flex; align-items: center; gap: 8px;
+  font-family: "Nunito", sans-serif; font-size: 12px; font-weight: 700; color: var(--text-muted);
+}
+.toplu-controls select,
+.display-row select {
+  font-family: "Nunito", sans-serif; font-size: 13px; font-weight: 700;
+  color: var(--green-dark); background: var(--green-light);
+  border: 1px solid var(--green-mid); border-radius: 6px; padding: 7px 10px; outline: none;
+}
+.toplu-controls span,
+.toplu-hint {
+  color: var(--text-hint); font-size: 11px;
+}
+.toplu-hint { margin: 0 0 7px; }
+.toplu-ekle-area textarea {
+  width: 100%; min-height: 86px; resize: vertical;
+  border: 1px solid var(--gray-border); border-radius: var(--radius-sm);
+  padding: 8px 10px; background: var(--card); outline: none;
+}
+.toplu-actions {
+  display: flex; align-items: center; gap: 10px; margin-top: 10px; flex-wrap: wrap;
+}
+.toplu-actions button {
+  font-family: "Nunito", sans-serif; font-size: 12px; font-weight: 700;
+  background: var(--green); color: #fff; border: none; border-radius: var(--radius-sm);
+  padding: 8px 14px;
+}
+.toplu-actions .btn-bulk-save {
+  background: var(--card); color: var(--green-dark);
+  border: 1.5px solid var(--green-mid);
+}
+.toplu-actions .btn-bulk-save:disabled {
+  opacity: .65; cursor: wait;
+}
+#bulkResult { font-size: 12px; color: var(--green-dark); }
+.display-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  margin-bottom: 12px; flex-wrap: wrap;
+}
+.btn-clear-list {
+  font-family: "Nunito", sans-serif; font-size: 12px; font-weight: 700;
+  background: var(--red-light); color: #B83232;
+  border: 1px solid #F7C1C1; border-radius: var(--radius-sm); padding: 7px 12px;
+}
+.list-label {
+  font-family: "Nunito", sans-serif; font-size: 13px; font-weight: 700;
+  margin-bottom: 10px; color: var(--text);
+}
+.student-list { display: grid; gap: 8px; margin-bottom: 12px; }
+.student-item {
+  background: var(--gray-light); border: 1px solid var(--gray-border);
+  border-radius: var(--radius-sm); padding: 9px 10px;
+  display: grid; grid-template-columns: 30px 64px minmax(0,1fr) auto auto 22px;
+  align-items: center; gap: 8px;
+}
+.student-item:hover,
+.student-item.active { border-color: var(--green-mid); background: var(--green-light); }
+.student-order { font-size: 11px; color: var(--text-hint); }
+.student-no {
+  font-family: "Nunito", sans-serif; font-size: 12px; font-weight: 800; color: var(--green-dark);
+  border-bottom: 1px dashed var(--green-mid); text-align: center;
+}
+.student-name {
+  font-family: "Nunito", sans-serif; font-size: 13px; font-weight: 700; color: var(--text);
+  overflow-wrap: anywhere; display: inline-flex; align-items: center; gap: 6px; min-width: 0;
+}
+.viewed-check {
+  min-width: 17px; height: 17px; border-radius: 999px;
+  display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto;
+  background: var(--green); color: #fff; font-size: 10px; font-weight: 900;
+  padding: 0 6px; white-space: nowrap;
+}
+.student-meta { display: block; color: var(--text-muted); font-size: 11px; margin-top: 2px; }
+.pin-pill {
+  font-family: "Nunito", sans-serif; font-size: 10px; font-weight: 800;
+  color: var(--amber-dark); background: var(--amber-light);
+  border: 1px solid #FAC775; border-radius: 6px; padding: 2px 6px; white-space: nowrap;
+}
+.student-select-btn {
+  font-size: 11px; background: var(--green); color: #fff; border: none;
+  border-radius: 5px; padding: 5px 9px; font-family: "Nunito", sans-serif; font-weight: 700;
+}
+.student-delete-btn {
+  width: 22px; height: 22px; border: none; background: transparent; color: var(--text-hint);
+  border-radius: 4px; font-size: 18px; line-height: 1; display: flex; align-items: center; justify-content: center;
+}
+.student-delete-btn:hover { color: #B83232; background: #FDECEC; }
+.empty-list { text-align: center; padding: 24px 12px; color: var(--text-hint); }
+
+@media (max-width: 760px) {
+  .topbar { height: auto; flex-wrap: wrap; padding: 12px 16px; }
+  .topbar-brand, .topbar-right { min-width: 0; }
+  .topbar-title { order: 3; width: 100%; text-align: left; }
+  .main { padding: 16px 12px 36px; }
+  .student-bar, .deneme-wrap, .save-bar { flex-direction: column; align-items: stretch; }
+  .grid2 { grid-template-columns: 1fr; }
+  .student-name-row { grid-template-columns: 1fr; }
+  .konu-report-grid { grid-template-columns: 1fr; }
+  .durum-box { justify-content: space-between; }
+  .deneme-left { width: 100%; }
+}

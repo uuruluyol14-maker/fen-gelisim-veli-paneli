@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fen Gelişim Programı Öğretmen Paneli</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=Nunito+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="ogretmen.css?v=8">
+</head>
+<body>
+  <div class="teacher-lock" id="teacherLock">
+    <form class="teacher-lock-card" id="teacherLockForm">
+      <span class="brand-icon lock-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#1D9E75" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+          <path d="M9 3v18M3 9h18"></path>
+        </svg>
+      </span>
+      <p>Fen Gelişim Programı</p>
+      <h1>Öğretmen Paneli</h1>
+      <label for="teacherPassword">Panel Şifresi</label>
+      <input id="teacherPassword" type="password" autocomplete="current-password" placeholder="Şifre">
+      <button type="submit">Panele Gir</button>
+      <strong id="teacherLockError"></strong>
+    </form>
+  </div>
+
+  <div class="topbar">
+    <div class="topbar-brand">
+      <div class="brand-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#1D9E75" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+          <path d="M9 3v18M3 9h18"></path>
+        </svg>
+      </div>
+      <div>
+        <div class="brand-name">FEN</div>
+        <div class="brand-sub">GELİŞİM PROGRAMI</div>
+      </div>
+    </div>
+
+    <div class="topbar-title">HAFTALIK GELİŞİM RAPORU</div>
+
+    <div class="topbar-right">
+      <input type="week" id="weekInput">
+      <button type="button" class="btn-ogrenci-listesi" id="studentListButton">
+        <span>Öğrenci Listesi</span>
+        <span class="total-badge" id="studentCount">0</span>
+      </button>
+      <button type="button" class="btn-save-top" id="refreshButton">Google Sheets'ten Al</button>
+      <button type="button" class="btn-logout" id="teacherLogoutButton">Çıkış</button>
+    </div>
+  </div>
+
+  <div class="status-bar" id="statusBar">Hazır. Google Sheets'ten veri almak için sağ üstteki butonu kullanabilirsiniz.</div>
+
+  <div class="panel-overlay hidden" id="studentPanelOverlay">
+    <aside class="ogrenci-panel">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">Sınıf Öğrenci Listeleri</div>
+          <div class="panel-sub" id="selectedLabel">Toplu öğrenci ekle & yönet, rapora aktar</div>
+        </div>
+        <button type="button" class="panel-close" id="studentPanelClose">×</button>
+      </div>
+      <div class="panel-body">
+        <div class="class-tabs" id="classTabs">
+          <button type="button" class="panel-tab active" data-class="5">5. Sınıf <span class="tab-count">0</span></button>
+          <button type="button" class="panel-tab" data-class="6">6. Sınıf <span class="tab-count">0</span></button>
+          <button type="button" class="panel-tab" data-class="7">7. Sınıf <span class="tab-count">0</span></button>
+          <button type="button" class="panel-tab" data-class="8">8. Sınıf <span class="tab-count">0</span></button>
+        </div>
+
+        <div class="toplu-ekle-area">
+          <div class="toplu-title">+ Toplu Öğrenci Ekle</div>
+          <div class="toplu-controls">
+            <label> Eklenecek sınıf
+              <select id="bulkClassSelect">
+                <option value="5">5. Sınıf</option>
+                <option value="6">6. Sınıf</option>
+                <option value="7">7. Sınıf</option>
+                <option value="8">8. Sınıf</option>
+              </select>
+            </label>
+            <label> Şube
+              <select id="bulkBranchSelect">
+                <option value="A">A Şubesi</option>
+                <option value="B">B Şubesi</option>
+                <option value="C">C Şubesi</option>
+                <option value="D">D Şubesi</option>
+              </select>
+            </label>
+            <span>Öğrenciler seçilen sınıf ve şube listesine kaydedilir.</span>
+          </div>
+          <p class="toplu-hint">Her satıra öğrenci no + ad soyad yazın. Sadece ad yazılırsa sistem geçici numara üretir.</p>
+          <textarea id="bulkStudentText" rows="5" placeholder="1001 Ali Yılmaz&#10;1002 Ayşe Kaya&#10;1003 Mehmet Demir"></textarea>
+          <div class="toplu-actions">
+            <button type="button" id="bulkAddButton">✓ Listeye Ekle</button>
+            <button type="button" class="btn-bulk-save" id="bulkSaveButton">Google'a Kaydet</button>
+            <span id="bulkResult"></span>
+          </div>
+        </div>
+
+        <div class="display-row">
+          <label>Görüntülenen şube
+            <select id="displayBranchSelect">
+              <option value="A">A Şubesi</option>
+              <option value="B">B Şubesi</option>
+              <option value="C">C Şubesi</option>
+              <option value="D">D Şubesi</option>
+            </select>
+          </label>
+          <button type="button" class="btn-clear-list" id="clearClassListButton">Listeyi Temizle</button>
+        </div>
+        <div class="list-label" id="listLabel">5. Sınıf A Şubesi — 0 öğrenci</div>
+        <div class="student-list" id="studentList"></div>
+      </div>
+    </aside>
+  </div>
+
+  <form class="main" id="reportForm">
+    <div class="student-bar">
+      <div class="student-left">
+        <div class="avatar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#1D9E75" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        </div>
+        <div class="student-fields">
+          <div class="student-name-row">
+            <input class="student-name-input" name="ad" id="firstNameInput" type="text" placeholder="Öğrenci Adı" required>
+            <input class="student-name-input" name="soyad" id="lastNameInput" type="text" placeholder="Soyadı" required>
+          </div>
+          <div class="main-viewed-badge hidden" id="mainViewedBadge"></div>
+          <input type="hidden" name="adSoyad" id="nameInput">
+          <input type="hidden" name="studentNo" id="studentNoInput">
+          <input type="hidden" name="sinif" id="classInput">
+          <input type="hidden" name="sube" id="branchInput">
+        </div>
+      </div>
+
+      <div class="durum-box">
+        <span>Genel Durum</span>
+        <select class="durum-select" id="generalStatus">
+          <option>İyi</option>
+          <option>Orta</option>
+          <option>Zayıf</option>
+        </select>
+      </div>
+    </div>
+
+    <input type="hidden" name="pin" id="pinInput">
+
+    <div class="grid2">
+      <section class="card classic-report-card">
+        <div class="card-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+          1. Ödev Durumu
+        </div>
+        <div class="odev-layout">
+          <div class="donut-wrap">
+            <svg viewBox="0 0 42 42" class="donut">
+              <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#E2E8E6" stroke-width="5"></circle>
+              <circle id="homeworkArc" cx="21" cy="21" r="15.915" fill="transparent" stroke="#1D9E75" stroke-width="5" stroke-dasharray="90 10" stroke-dashoffset="25" stroke-linecap="round"></circle>
+            </svg>
+            <div class="donut-label">
+              <span id="homeworkDisplay">%0</span>
+            </div>
+          </div>
+          <div class="odev-info">
+            <div class="mini-label">Ödev Başarı Grafiği</div>
+            <label class="inline-number">
+              Başarı Yüzdesi
+              <input name="odevYuzde" id="homeworkInput" type="number" min="0" max="100" value="0">
+            </label>
+            <div class="mini-label">Durum</div>
+            <strong id="homeworkText">Girilmedi</strong>
+          </div>
+        </div>
+        <div class="tip-box" id="homeworkTip">
+          <span>✓</span>
+          <p>Ödev yüzdesini girince veliye uygun kısa değerlendirme otomatik oluşur.</p>
+        </div>
+      </section>
+
+      <section class="card classic-report-card">
+        <div class="card-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path></svg>
+          2. Derse Katılım
+        </div>
+        <div class="kat-layout">
+          <div class="donut-wrap small">
+            <svg viewBox="0 0 42 42" class="donut">
+              <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#E2E8E6" stroke-width="5"></circle>
+              <circle id="participationArc" cx="21" cy="21" r="15.915" fill="transparent" stroke="#1D9E75" stroke-width="5" stroke-dasharray="85 15" stroke-dashoffset="25" stroke-linecap="round"></circle>
+            </svg>
+            <div class="donut-label">
+              <input name="katilimYuzde" id="participationInput" type="number" min="0" max="100" value="0">
+              <span>Katılım %</span>
+            </div>
+          </div>
+          <div class="kat-details">
+            <div class="mini-label">Katılım Oranı Detayı</div>
+            <label>Derse Katılım <select><option>İyi</option><option>Orta</option><option>Zayıf</option></select></label>
+            <label>Soru Sorma <select><option>Orta</option><option>İyi</option><option>Zayıf</option></select></label>
+            <label>Derse Hazırlık <select><option>İyi</option><option>Orta</option><option>Zayıf</option></select></label>
+            <label>Dikkat ve İlgi <select><option>İyi</option><option>Orta</option><option>Zayıf</option></select></label>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="grid2">
+      <section class="card classic-report-card">
+        <div class="card-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+          3. Öğretmen Notu
+        </div>
+        <textarea class="teacher-textarea" name="ogretmenNotu" id="teacherNoteInput" placeholder="Bu haftaki gözlem ve değerlendirmelerinizi buraya yazın..."></textarea>
+        <div class="teacher-sig">
+          <span>♙</span>
+          <input type="text" value="Fen Bilimleri Öğretmeni Uğur Uluyol">
+        </div>
+      </section>
+
+      <section class="card classic-report-card">
+        <div class="card-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+          4. Konu Raporu
+        </div>
+        <div class="konu-report-grid">
+          <label class="konu-field">
+            İşlenen konu
+            <input name="islenenKonu" id="topicInput" placeholder="Örn. Hücre Bölünmesi">
+          </label>
+          <label class="konu-field">
+            Anlama düzeyi
+            <select name="anlamaDuzeyi" id="levelInput">
+              <option value="">Seçiniz</option>
+              <option>Çok iyi</option>
+              <option>İyi</option>
+              <option>Orta</option>
+              <option>Zayıf</option>
+            </select>
+          </label>
+          <label class="konu-field konu-wide">
+            Ev çalışması
+            <textarea name="evCalismasi" id="homeStudyInput" rows="4" placeholder="Örn. Konu özeti + 30 soru"></textarea>
+          </label>
+        </div>
+      </section>
+    </div>
+
+    <section class="card deneme-card">
+      <div class="card-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+        5. Deneme Sonucu
+      </div>
+      <div class="deneme-wrap">
+        <input type="hidden" name="dogru" id="correctInput" value="0">
+        <input type="hidden" name="yanlis" id="wrongInput" value="0">
+        <input type="hidden" name="bos" id="blankInput" value="0">
+        <div class="chart-area">
+          <div class="chart-label">
+            <div class="chart-title-stack">
+              <span>Net Değişimi (Denemeler arası)</span>
+              <strong class="last-exam-summary">Son Deneme <b id="netPreview">0.00</b> / 20 Net</strong>
+            </div>
+            <div class="deneme-count-control">
+              <span>Deneme Sayısı:</span>
+              <button type="button" id="decreaseExamButton">−</button>
+              <strong id="examCountLabel">4</strong>
+              <button type="button" id="increaseExamButton">+</button>
+            </div>
+          </div>
+          <div class="chart-canvas-wrap"><canvas id="trendChart"></canvas></div>
+          <div class="deneme-net-inputs" id="denemeNetInputs"></div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="report-footer">
+      <span>☆</span>
+      <input type="text" value="Düzenli çalışma ve tekrar başarıyı getirir. Hedeflerine adım adım">
+    </footer>
+
+    <div class="save-bar">
+      <span id="saveInfo">Kayıt seçilmedi.</span>
+      <div>
+        <button type="button" class="btn-secondary" id="sampleFillButton">Örnek Doldur</button>
+        <button type="button" class="btn-secondary" id="previewParentButton">Veli Önizleme</button>
+        <button type="submit" class="btn-primary">Google Sheets'e Kaydet</button>
+      </div>
+    </div>
+  </form>
+
+  <script src="ogretmen.js?v=8"></script>
+</body>
+</html>
+

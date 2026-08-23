@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fen Gelişim Programı Veli Girişi</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Nunito+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="portal-shell">
+    <section class="login-screen" id="loginScreen">
+      <div class="hero-panel">
+        <div class="brand-row">
+          <span class="brand-mark">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+              <path d="M9 3v18M3 9h18"></path>
+            </svg>
+          </span>
+          <div>
+            <strong>FEN</strong>
+            <p>Gelişim Programı</p>
+          </div>
+        </div>
+
+        <div class="hero-copy">
+          <h1>Haftalık Gelişim Raporu</h1>
+          <p>Öğrencinizin fen bilimleri dersi gelişim raporunu öğrenci numarası ve PIN ile güvenli şekilde görüntüleyin.</p>
+        </div>
+
+        <div class="hero-footer">
+          <span>Fen Bilimleri Öğretmeni</span>
+          <strong>Uğur Uluyol</strong>
+        </div>
+      </div>
+
+      <div class="login-side">
+        <form class="login-card" id="loginForm">
+          <p class="form-kicker">Veli Girişi</p>
+          <h2>Raporu görüntüle</h2>
+          <p class="form-note">Size iletilen öğrenci numarası ve PIN bilgisini giriniz.</p>
+
+          <label for="studentNo">Öğrenci numarası</label>
+          <input id="studentNo" name="studentNo" inputmode="numeric" autocomplete="off" placeholder="Örn. 1001" required>
+
+          <label for="studentPin">PIN</label>
+          <input id="studentPin" name="studentPin" autocomplete="off" placeholder="Örn. 1001AY" required>
+
+          <button type="submit">Raporu Aç</button>
+          <p class="error-message" id="errorMessage" role="alert"></p>
+        </form>
+
+        <aside class="privacy-box">
+          <strong>Gizlilik</strong>
+          <p>Her veli yalnızca kendi öğrencisinin raporunu görüntüler. Rapor ekranında düzenleme yapılamaz.</p>
+        </aside>
+      </div>
+    </section>
+
+    <section class="report-screen hidden" id="reportScreen">
+      <header class="report-toolbar">
+        <div>
+          <p>Fen Gelişim Programı</p>
+          <h2 id="reportTitle">Öğrenci Raporu</h2>
+        </div>
+        <div class="toolbar-actions">
+          <button type="button" id="logoutButton">Çıkış</button>
+        </div>
+      </header>
+      <iframe id="reportFrame" title="Fen Gelişim Programı Haftalık Raporu"></iframe>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
