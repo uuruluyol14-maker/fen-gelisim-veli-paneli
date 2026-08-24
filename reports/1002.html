@@ -1059,9 +1059,17 @@ wi.value = yr + '-W' + String(wk).padStart(2, '0');
 function colorSelect(el) {
   el.className = 'sev-select';
   const v = el.value;
-  if (v === 'İyi') el.classList.add('sev-iyi');
+  if (v === 'Çok İyi' || v === 'İyi') el.classList.add('sev-iyi');
   else if (v === 'Orta') el.classList.add('sev-orta');
   else el.classList.add('sev-zayif');
+}
+
+function colorDurumSelect(el) {
+  el.classList.remove('sev-iyi', 'sev-orta', 'sev-zayif');
+  const v = el.value;
+  if (v === 'Çok İyi' || v === 'İyi') el.classList.add('sev-iyi');
+  else if (v === 'Orta') el.classList.add('sev-orta');
+  else if (v === 'Zayıf') el.classList.add('sev-zayif');
 }
 
 // ── ÖDEV ──
@@ -1664,6 +1672,7 @@ function googleSheetsVerisiniUygula() {
       }
       el.value = nextValue;
       if (el.classList.contains('sev-select')) colorSelect(el);
+      if (el.classList.contains('durum-select')) colorDurumSelect(el);
       if (id === 'anlamaDuzeyi') applyAnlamaLevelClass(el, nextValue);
     };
 
