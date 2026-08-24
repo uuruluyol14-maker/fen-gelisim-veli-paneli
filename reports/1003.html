@@ -115,6 +115,13 @@
     background: var(--green-light); border-radius: var(--radius-sm);
     padding: 8px 16px;
   }
+  .durum-badge.sev-iyi { background: var(--green-light); color: var(--green-dark); }
+  .durum-badge.sev-orta { background: var(--amber-light); color: var(--amber-dark); }
+  .durum-badge.sev-zayif { background: var(--red-light); color: var(--red-dark); }
+  .durum-badge.sev-orta .durum-label,
+  .durum-badge.sev-orta .durum-select { color: var(--amber-dark) !important; -webkit-text-fill-color: var(--amber-dark); }
+  .durum-badge.sev-zayif .durum-label,
+  .durum-badge.sev-zayif .durum-select { color: var(--red-dark) !important; -webkit-text-fill-color: var(--red-dark); }
   .durum-badge svg { width: 18px; height: 18px; }
   .durum-label { font-size: 12px; color: var(--green-dark); }
   .durum-select {
@@ -1066,10 +1073,17 @@ function colorSelect(el) {
 
 function colorDurumSelect(el) {
   el.classList.remove('sev-iyi', 'sev-orta', 'sev-zayif');
+  const badge = el.closest('.durum-badge');
+  if (badge) badge.classList.remove('sev-iyi', 'sev-orta', 'sev-zayif');
   const v = el.value;
-  if (v === 'Çok İyi' || v === 'İyi') el.classList.add('sev-iyi');
-  else if (v === 'Orta') el.classList.add('sev-orta');
-  else if (v === 'Zayıf') el.classList.add('sev-zayif');
+  let cls = '';
+  if (v === 'Çok İyi' || v === 'İyi') cls = 'sev-iyi';
+  else if (v === 'Orta') cls = 'sev-orta';
+  else if (v === 'Zayıf') cls = 'sev-zayif';
+  if (cls) {
+    el.classList.add(cls);
+    if (badge) badge.classList.add(cls);
+  }
 }
 
 // ── ÖDEV ──
