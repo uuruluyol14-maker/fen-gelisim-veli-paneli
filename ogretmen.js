@@ -364,7 +364,7 @@ function fillForm(report = {}) {
   form.elements.sinif.value = report.sinif || "";
   form.elements.sube.value = report.sube || "";
   form.elements.pin.value = report.pin || generatePin(report.studentNo, displayName);
-  form.elements.genelDurum.value = generalLevel || "İyi";
+  form.elements.genelDurum.value = generalLevel || "";
   form.elements.odevYuzde.value = hasEnteredValue(report.odevYuzde) ? report.odevYuzde : "";
   form.elements.katilimYuzde.value = hasEnteredValue(report.katilimYuzde) ? report.katilimYuzde : "";
   form.elements.islenenKonu.value = report.islenenKonu || "";
@@ -687,7 +687,9 @@ listen(form, "submit", async (event) => {
     const result = await callSheets("saveReport", report);
     if (!result.ok) throw new Error(result.error || "Kayıt yapılamadı.");
 
-    const savedReport = result.report;
+    const savedReport = { ...report, ...(result.report || {}) };
+    savedReport.genelDurum = normalizeLevelValue(savedReport.genelDurum) || report.genelDurum;
+    savedReport.anlamaDuzeyi = normalizeLevelValue(savedReport.anlamaDuzeyi) || report.anlamaDuzeyi;
     const index = reports.findIndex(item => String(item.studentNo) === String(savedReport.studentNo));
     if (index >= 0) {
       reports[index] = savedReport;
