@@ -394,22 +394,10 @@
   body.veli-mode select {
     appearance: none;
   }
-  body.veli-mode .konu-level-readonly {
-    display: flex;
-    align-items: center;
-    width: 100%;
-    min-height: 42px;
-    padding: 0 12px;
-    box-sizing: border-box;
-    border: 1px solid var(--green-mid);
-    border-radius: var(--radius-sm);
-    background: var(--green-light);
-    color: var(--green-dark);
-    font-family: 'Nunito', sans-serif;
-    font-size: 16px;
-    font-weight: 800;
-    line-height: 1.2;
-    white-space: normal;
+  body.veli-mode #anlamaDuzeyi {
+    opacity: 1;
+    color: var(--green-dark) !important;
+    -webkit-text-fill-color: var(--green-dark);
   }
 
   /* ── ÖĞRENCİ LİSTESİ PANELİ ── */
@@ -1680,20 +1668,15 @@ function veliModuHazirla() {
   if (params.get('veli') !== '1') return;
 
   document.body.classList.add('veli-mode');
-  const anlamaSelect = document.getElementById('anlamaDuzeyi');
-  if (anlamaSelect && anlamaSelect.tagName === 'SELECT') {
-    const text = anlamaSelect.options[anlamaSelect.selectedIndex]?.text || anlamaSelect.value || '';
-    const readonlyValue = document.createElement('div');
-    readonlyValue.id = 'anlamaDuzeyi';
-    readonlyValue.className = 'konu-level-readonly';
-    readonlyValue.textContent = text;
-    anlamaSelect.replaceWith(readonlyValue);
-  }
   document.querySelectorAll('input, textarea').forEach(el => {
     el.readOnly = true;
     el.tabIndex = -1;
   });
   document.querySelectorAll('select, button').forEach(el => {
+    if (el.id === 'anlamaDuzeyi') {
+      el.tabIndex = -1;
+      return;
+    }
     el.disabled = true;
     el.tabIndex = -1;
   });
