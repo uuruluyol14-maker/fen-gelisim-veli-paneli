@@ -278,6 +278,10 @@ function collectForm() {
   report.pin = generatePin(report.studentNo, report.adSoyad);
   report.genelDurum = normalizeLevelValue(report.genelDurum);
   report.anlamaDuzeyi = normalizeLevelValue(report.anlamaDuzeyi);
+  report.derseKatilim = normalizeLevelValue(report.derseKatilim);
+  report.soruSorma = normalizeLevelValue(report.soruSorma);
+  report.derseHazirlik = normalizeLevelValue(report.derseHazirlik);
+  report.dikkatIlgi = normalizeLevelValue(report.dikkatIlgi);
   report.odevYuzde = optionalNumber(report.odevYuzde);
   report.katilimYuzde = optionalNumber(report.katilimYuzde);
   report.dogru = optionalNumber(report.dogru);
@@ -318,6 +322,10 @@ function collectSharedReportFields() {
   if (String(report.islenenKonu || "").trim()) shared.islenenKonu = report.islenenKonu;
   if (String(report.anlamaDuzeyi || "").trim()) shared.anlamaDuzeyi = report.anlamaDuzeyi;
   if (String(report.genelDurum || "").trim()) shared.genelDurum = report.genelDurum;
+  if (String(report.derseKatilim || "").trim()) shared.derseKatilim = report.derseKatilim;
+  if (String(report.soruSorma || "").trim()) shared.soruSorma = report.soruSorma;
+  if (String(report.derseHazirlik || "").trim()) shared.derseHazirlik = report.derseHazirlik;
+  if (String(report.dikkatIlgi || "").trim()) shared.dikkatIlgi = report.dikkatIlgi;
   if (String(report.evCalismasi || "").trim()) shared.evCalismasi = report.evCalismasi;
   if (correct > 0 || wrong > 0 || blank > 0) {
     shared.dogru = correct;
@@ -365,6 +373,10 @@ function fillForm(report = {}) {
   form.elements.sube.value = report.sube || "";
   form.elements.pin.value = report.pin || generatePin(report.studentNo, displayName);
   form.elements.genelDurum.value = generalLevel || "";
+  form.elements.derseKatilim.value = normalizeLevelValue(report.derseKatilim) || "İyi";
+  form.elements.soruSorma.value = normalizeLevelValue(report.soruSorma) || "Orta";
+  form.elements.derseHazirlik.value = normalizeLevelValue(report.derseHazirlik) || "İyi";
+  form.elements.dikkatIlgi.value = normalizeLevelValue(report.dikkatIlgi) || "İyi";
   form.elements.odevYuzde.value = hasEnteredValue(report.odevYuzde) ? report.odevYuzde : "";
   form.elements.katilimYuzde.value = hasEnteredValue(report.katilimYuzde) ? report.katilimYuzde : "";
   form.elements.islenenKonu.value = report.islenenKonu || "";
@@ -690,6 +702,10 @@ listen(form, "submit", async (event) => {
     const savedReport = { ...report, ...(result.report || {}) };
     savedReport.genelDurum = normalizeLevelValue(savedReport.genelDurum) || report.genelDurum;
     savedReport.anlamaDuzeyi = normalizeLevelValue(savedReport.anlamaDuzeyi) || report.anlamaDuzeyi;
+    savedReport.derseKatilim = normalizeLevelValue(savedReport.derseKatilim) || report.derseKatilim;
+    savedReport.soruSorma = normalizeLevelValue(savedReport.soruSorma) || report.soruSorma;
+    savedReport.derseHazirlik = normalizeLevelValue(savedReport.derseHazirlik) || report.derseHazirlik;
+    savedReport.dikkatIlgi = normalizeLevelValue(savedReport.dikkatIlgi) || report.dikkatIlgi;
     const index = reports.findIndex(item => String(item.studentNo) === String(savedReport.studentNo));
     if (index >= 0) {
       reports[index] = savedReport;
