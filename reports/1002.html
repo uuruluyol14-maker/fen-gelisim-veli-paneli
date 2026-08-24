@@ -970,8 +970,10 @@
           <div class="konu-field">
             <label for="anlamaDuzeyi">Anlama düzeyi</label>
             <select id="anlamaDuzeyi" class="konu-level">
+              <option>Çok iyi</option>
               <option>İyi</option>
               <option selected>Orta</option>
+              <option>Zayıf</option>
               <option>Kötü</option>
             </select>
           </div>
@@ -1677,7 +1679,8 @@ function normalizeAnlamaDuzeyi(value) {
   const text = String(value || '').trim();
   if (!text) return '';
   const lower = text.toLocaleLowerCase('tr-TR');
-  if (lower === 'zayıf' || lower === 'gelistirilmeli' || lower === 'geliştirilmeli') return 'Kötü';
+  if (lower === 'çok iyi' || lower === 'cok iyi') return 'Çok iyi';
+  if (lower === 'zayıf' || lower === 'gelistirilmeli' || lower === 'geliştirilmeli') return 'Zayıf';
   if (lower === 'iyi') return 'İyi';
   if (lower === 'orta') return 'Orta';
   if (lower === 'kötü' || lower === 'kotu') return 'Kötü';
@@ -1689,6 +1692,19 @@ function veliModuHazirla() {
   if (params.get('veli') !== '1') return;
 
   document.body.classList.add('veli-mode');
+  const anlamaSelect = document.getElementById('anlamaDuzeyi');
+  if (anlamaSelect && anlamaSelect.tagName === 'SELECT') {
+    const selectedText = anlamaSelect.options[anlamaSelect.selectedIndex]?.text || anlamaSelect.value || '';
+    const textBox = document.createElement('input');
+    textBox.id = 'anlamaDuzeyiText';
+    textBox.className = anlamaSelect.className;
+    textBox.type = 'text';
+    textBox.value = selectedText || 'Orta';
+    textBox.readOnly = true;
+    textBox.tabIndex = -1;
+    anlamaSelect.style.display = 'none';
+    anlamaSelect.insertAdjacentElement('afterend', textBox);
+  }
   document.querySelectorAll('input, textarea').forEach(el => {
     el.readOnly = true;
     el.tabIndex = -1;
