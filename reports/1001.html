@@ -252,6 +252,18 @@
     color: var(--green-dark) !important; background: var(--green-light) !important;
     border-color: var(--green-mid) !important; cursor: pointer;
   }
+  .konu-level.level-good {
+    color: var(--green-dark) !important; -webkit-text-fill-color: var(--green-dark);
+    background: var(--green-light) !important; border-color: var(--green-mid) !important;
+  }
+  .konu-level.level-mid {
+    color: var(--amber-dark) !important; -webkit-text-fill-color: var(--amber-dark);
+    background: var(--amber-light) !important; border-color: #FAC775 !important;
+  }
+  .konu-level.level-low {
+    color: var(--red-dark) !important; -webkit-text-fill-color: var(--red-dark);
+    background: var(--red-light) !important; border-color: #F7C1C1 !important;
+  }
   @media (max-width: 600px) { .konu-report-grid { grid-template-columns: 1fr; } }
 
 
@@ -287,6 +299,18 @@
     .chart-area { width: 100%; min-width: 0; }
     .chart-canvas-wrap { width: 100%; overflow: hidden; }
     .report-footer { padding: 12px 4px; }
+  }
+  body.veli-mode .konu-level.level-good {
+    color: var(--green-dark) !important; -webkit-text-fill-color: var(--green-dark);
+    background: var(--green-light) !important; border-color: var(--green-mid) !important;
+  }
+  body.veli-mode .konu-level.level-mid {
+    color: var(--amber-dark) !important; -webkit-text-fill-color: var(--amber-dark);
+    background: var(--amber-light) !important; border-color: #FAC775 !important;
+  }
+  body.veli-mode .konu-level.level-low {
+    color: var(--red-dark) !important; -webkit-text-fill-color: var(--red-dark);
+    background: var(--red-light) !important; border-color: #F7C1C1 !important;
   }
   /* ── OKUNABİLİRLİK ARTIŞI ── */
   .card-title { font-size: 19px; }
@@ -1640,6 +1664,7 @@ function googleSheetsVerisiniUygula() {
         el.add(new Option(nextValue, nextValue));
       }
       el.value = nextValue;
+      if (id === 'anlamaDuzeyi') applyAnlamaLevelClass(el, nextValue);
     };
 
     setValue('studentName', report.adSoyad);
@@ -1687,6 +1712,18 @@ function normalizeAnlamaDuzeyi(value) {
   return text;
 }
 
+function anlamaLevelClass(value) {
+  const lower = String(value || '').trim().toLocaleLowerCase('tr-TR');
+  if (lower === 'orta') return 'level-mid';
+  if (lower === 'zayıf' || lower === 'kötü' || lower === 'kotu' || lower === 'gelistirilmeli' || lower === 'geliştirilmeli') return 'level-low';
+  return 'level-good';
+}
+
+function applyAnlamaLevelClass(el, value) {
+  el.classList.remove('level-good', 'level-mid', 'level-low');
+  if (String(value || '').trim()) el.classList.add(anlamaLevelClass(value));
+}
+
 function veliModuHazirla() {
   const params = new URLSearchParams(window.location.search);
   if (params.get('veli') !== '1') return;
@@ -1700,6 +1737,7 @@ function veliModuHazirla() {
     textBox.className = anlamaSelect.className;
     textBox.type = 'text';
     textBox.value = selectedText || 'Orta';
+    applyAnlamaLevelClass(textBox, textBox.value);
     textBox.readOnly = true;
     textBox.tabIndex = -1;
     anlamaSelect.style.display = 'none';
