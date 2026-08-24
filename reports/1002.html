@@ -115,13 +115,6 @@
     background: var(--green-light); border-radius: var(--radius-sm);
     padding: 8px 16px;
   }
-  .durum-badge.sev-iyi { background: var(--green-light); color: var(--green-dark); }
-  .durum-badge.sev-orta { background: var(--amber-light); color: var(--amber-dark); }
-  .durum-badge.sev-zayif { background: var(--red-light); color: var(--red-dark); }
-  .durum-badge.sev-orta .durum-label,
-  .durum-badge.sev-orta .durum-select { color: var(--amber-dark) !important; -webkit-text-fill-color: var(--amber-dark); }
-  .durum-badge.sev-zayif .durum-label,
-  .durum-badge.sev-zayif .durum-select { color: var(--red-dark) !important; -webkit-text-fill-color: var(--red-dark); }
   .durum-badge svg { width: 18px; height: 18px; }
   .durum-label { font-size: 12px; color: var(--green-dark); }
   .durum-select {
@@ -225,6 +218,7 @@
     font-family: 'Nunito Sans', sans-serif; font-size: 13px; color: var(--text); line-height: 1.6;
     border: 1px solid var(--gray-border); border-radius: var(--radius-sm);
     padding: 10px 12px; background: var(--gray-light); resize: vertical; outline: none;
+    overflow-y: auto;
   }
   .teacher-textarea:focus { border-color: var(--green-mid); }
   .teacher-sig {
@@ -417,6 +411,13 @@
   body.veli-mode textarea {
     border-color: transparent !important;
     background: transparent !important;
+  }
+  body.veli-mode #teacherNote {
+    pointer-events: auto;
+    max-height: 210px;
+    overflow-y: auto;
+    resize: none;
+    cursor: default;
   }
   body.veli-mode .student-name-input {
     width: min(620px, 100%);
@@ -1073,17 +1074,10 @@ function colorSelect(el) {
 
 function colorDurumSelect(el) {
   el.classList.remove('sev-iyi', 'sev-orta', 'sev-zayif');
-  const badge = el.closest('.durum-badge');
-  if (badge) badge.classList.remove('sev-iyi', 'sev-orta', 'sev-zayif');
   const v = el.value;
-  let cls = '';
-  if (v === 'Çok İyi' || v === 'İyi') cls = 'sev-iyi';
-  else if (v === 'Orta') cls = 'sev-orta';
-  else if (v === 'Zayıf') cls = 'sev-zayif';
-  if (cls) {
-    el.classList.add(cls);
-    if (badge) badge.classList.add(cls);
-  }
+  if (v === 'Çok İyi' || v === 'İyi') el.classList.add('sev-iyi');
+  else if (v === 'Orta') el.classList.add('sev-orta');
+  else if (v === 'Zayıf') el.classList.add('sev-zayif');
 }
 
 // ── ÖDEV ──
