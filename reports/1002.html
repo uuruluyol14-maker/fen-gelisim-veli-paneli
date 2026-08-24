@@ -394,6 +394,7 @@
   body.veli-mode select {
     appearance: none;
   }
+  body.veli-mode #genelDurum,
   body.veli-mode #anlamaDuzeyi {
     opacity: 1;
     color: var(--green-dark) !important;
@@ -971,7 +972,7 @@
             <select id="anlamaDuzeyi" class="konu-level">
               <option>İyi</option>
               <option selected>Orta</option>
-              <option>Geliştirilmeli</option>
+              <option>Kötü</option>
             </select>
           </div>
         </div>
@@ -1628,10 +1629,19 @@ function googleSheetsVerisiniUygula() {
     const report = JSON.parse(raw);
     const setValue = (id, value) => {
       const el = document.getElementById(id);
-      if (el) el.value = value === undefined || value === null || value === 0 ? '' : value;
+      if (!el) return;
+      let nextValue = value === undefined || value === null || value === 0 ? '' : value;
+      if (id === 'anlamaDuzeyi') {
+        nextValue = normalizeAnlamaDuzeyi(nextValue);
+      }
+      if (el.tagName === 'SELECT' && nextValue && ![...el.options].some(option => option.value === nextValue || option.text === nextValue)) {
+        el.add(new Option(nextValue, nextValue));
+      }
+      el.value = nextValue;
     };
 
     setValue('studentName', report.adSoyad);
+    setValue('genelDurum', report.genelDurum);
 
     const sinif = String(report.sinif || '').trim();
     const sinifSelect = document.getElementById('sinif');
@@ -1663,6 +1673,17 @@ function googleSheetsVerisiniUygula() {
   }
 }
 
+function normalizeAnlamaDuzeyi(value) {
+  const text = String(value || '').trim();
+  if (!text) return '';
+  const lower = text.toLocaleLowerCase('tr-TR');
+  if (lower === 'zayıf' || lower === 'gelistirilmeli' || lower === 'geliştirilmeli') return 'Kötü';
+  if (lower === 'iyi') return 'İyi';
+  if (lower === 'orta') return 'Orta';
+  if (lower === 'kötü' || lower === 'kotu') return 'Kötü';
+  return text;
+}
+
 function veliModuHazirla() {
   const params = new URLSearchParams(window.location.search);
   if (params.get('veli') !== '1') return;
@@ -1673,7 +1694,7 @@ function veliModuHazirla() {
     el.tabIndex = -1;
   });
   document.querySelectorAll('select, button').forEach(el => {
-    if (el.id === 'anlamaDuzeyi') {
+    if (el.id === 'genelDurum' || el.id === 'anlamaDuzeyi') {
       el.tabIndex = -1;
       return;
     }

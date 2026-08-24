@@ -1,5 +1,5 @@
 const GOOGLE_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzw3QdvCMorTvdm-WtAAm-kOU-CfvjD_eXqNcpBKvkpkZz6zylpGKnFTeMLeqwsgBl3/exec";
-const TEACHER_PANEL_PASSWORD = "ugur2026";
+const TEACHER_PANEL_PASSWORD = "İsmetİnönü1.";
 const DENEME_LIMIT = 12;
 
 const form = document.getElementById("reportForm");
@@ -304,6 +304,7 @@ function collectSharedReportFields() {
   if (participation > 0) shared.katilimYuzde = participation;
   if (String(report.islenenKonu || "").trim()) shared.islenenKonu = report.islenenKonu;
   if (String(report.anlamaDuzeyi || "").trim()) shared.anlamaDuzeyi = report.anlamaDuzeyi;
+  if (String(report.genelDurum || "").trim()) shared.genelDurum = report.genelDurum;
   if (String(report.evCalismasi || "").trim()) shared.evCalismasi = report.evCalismasi;
   if (correct > 0 || wrong > 0 || blank > 0) {
     shared.dogru = correct;
@@ -349,6 +350,7 @@ function fillForm(report = {}) {
   form.elements.sinif.value = report.sinif || "";
   form.elements.sube.value = report.sube || "";
   form.elements.pin.value = report.pin || generatePin(report.studentNo, displayName);
+  form.elements.genelDurum.value = report.genelDurum || "İyi";
   form.elements.odevYuzde.value = hasEnteredValue(report.odevYuzde) ? report.odevYuzde : "";
   form.elements.katilimYuzde.value = hasEnteredValue(report.katilimYuzde) ? report.katilimYuzde : "";
   form.elements.islenenKonu.value = report.islenenKonu || "";
