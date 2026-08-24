@@ -252,6 +252,17 @@ function escapeHtml(value) {
   })[char]);
 }
 
+function normalizeLevelValue(value) {
+  const text = String(value || "").trim();
+  if (!text) return "";
+  const lower = text.toLocaleLowerCase("tr-TR");
+  if (lower === "çok iyi" || lower === "cok iyi") return "Çok İyi";
+  if (lower === "iyi") return "İyi";
+  if (lower === "orta") return "Orta";
+  if (lower === "zayıf" || lower === "zayif" || lower === "kötü" || lower === "kotu" || lower === "geliştirilmeli" || lower === "gelistirilmeli") return "Zayıf";
+  return text;
+}
+
 function reportPath(studentNo) {
   if (String(studentNo) === "1002") return "reports/1002.html";
   if (String(studentNo) === "1003") return "reports/1003.html";
@@ -265,6 +276,8 @@ function collectForm() {
   const report = Object.fromEntries(data.entries());
   report.adSoyad = `${report.ad || ""} ${report.soyad || ""}`.trim();
   report.pin = generatePin(report.studentNo, report.adSoyad);
+  report.genelDurum = normalizeLevelValue(report.genelDurum);
+  report.anlamaDuzeyi = normalizeLevelValue(report.anlamaDuzeyi);
   report.odevYuzde = optionalNumber(report.odevYuzde);
   report.katilimYuzde = optionalNumber(report.katilimYuzde);
   report.dogru = optionalNumber(report.dogru);
@@ -338,7 +351,8 @@ function updateMainViewedBadge(report = {}) {
 function fillForm(report = {}) {
   const names = splitName(report);
   const displayName = fullName(report);
-  const understandingLevel = report.anlamaDuzeyi === "Geliştirilmeli" ? "Zayıf" : report.anlamaDuzeyi;
+  const understandingLevel = normalizeLevelValue(report.anlamaDuzeyi);
+  const generalLevel = normalizeLevelValue(report.genelDurum);
   form.reset();
   activeStudentNo = String(report.studentNo || "");
   selectedLabel.textContent = displayName || "Yeni kayıt";
@@ -350,7 +364,7 @@ function fillForm(report = {}) {
   form.elements.sinif.value = report.sinif || "";
   form.elements.sube.value = report.sube || "";
   form.elements.pin.value = report.pin || generatePin(report.studentNo, displayName);
-  form.elements.genelDurum.value = report.genelDurum || "İyi";
+  form.elements.genelDurum.value = generalLevel || "İyi";
   form.elements.odevYuzde.value = hasEnteredValue(report.odevYuzde) ? report.odevYuzde : "";
   form.elements.katilimYuzde.value = hasEnteredValue(report.katilimYuzde) ? report.katilimYuzde : "";
   form.elements.islenenKonu.value = report.islenenKonu || "";
