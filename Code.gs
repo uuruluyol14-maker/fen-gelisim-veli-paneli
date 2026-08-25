@@ -6,11 +6,17 @@ const HEADERS = [
   'sinif',
   'sube',
   'pin',
+  'genelDurum',
   'odevYuzde',
   'katilimYuzde',
+  'derseKatilim',
+  'soruSorma',
+  'derseHazirlik',
+  'dikkatIlgi',
   'islenenKonu',
   'anlamaDuzeyi',
   'evCalismasi',
+  'ogretmenNotu',
   'deneme1',
   'deneme2',
   'deneme3',
@@ -23,14 +29,8 @@ const HEADERS = [
   'deneme10',
   'deneme11',
   'deneme12',
-  'ogretmenNotu',
   'sonGuncelleme',
-  'veliGordu',
-  'genelDurum',
-  'derseKatilim',
-  'soruSorma',
-  'derseHazirlik',
-  'dikkatIlgi'
+  'veliGordu'
 ];
 
 function doGet(e) {
@@ -325,7 +325,7 @@ function ensureSheet_() {
   const needsHeaders = HEADERS.some((header, index) => currentHeaders[index] !== header);
 
   if (needsHeaders) {
-    const oldHeaders = currentHeaders.map(header => String(header || '').trim());
+    const oldHeaders = currentHeaders.map(header => canonicalHeader_(header));
     const lastRow = sheet.getLastRow();
     let existingReports = [];
 
@@ -440,9 +440,70 @@ function getHeaderMap_(sheet) {
   const headers = sheet.getRange(1, 1, 1, Math.max(sheet.getLastColumn(), HEADERS.length)).getValues()[0];
   const map = {};
   headers.forEach((header, index) => {
-    if (header) map[String(header).trim()] = index + 1;
+    const key = canonicalHeader_(header);
+    if (key) map[key] = index + 1;
   });
   return map;
+}
+
+function canonicalHeader_(header) {
+  const raw = String(header || '').trim();
+  if (!raw) return '';
+  if (HEADERS.indexOf(raw) !== -1) return raw;
+
+  const key = raw
+    .toLocaleLowerCase('tr-TR')
+    .replace(/[ıİ]/g, 'i')
+    .replace(/[ğĞ]/g, 'g')
+    .replace(/[üÜ]/g, 'u')
+    .replace(/[şŞ]/g, 's')
+    .replace(/[öÖ]/g, 'o')
+    .replace(/[çÇ]/g, 'c')
+    .replace(/[^a-z0-9]/g, '');
+
+  const aliases = {
+    ogrencino: 'studentNo',
+    ogrencinumara: 'studentNo',
+    ogrencinumarasi: 'studentNo',
+    numara: 'studentNo',
+    no: 'studentNo',
+    adsoyad: 'adSoyad',
+    adisoyadi: 'adSoyad',
+    ogrenciadi: 'ad',
+    adi: 'ad',
+    ad: 'ad',
+    soyadi: 'soyad',
+    soyad: 'soyad',
+    sinif: 'sinif',
+    sube: 'sube',
+    sifre: 'pin',
+    pin: 'pin',
+    odevyuzde: 'odevYuzde',
+    odevyuzdesi: 'odevYuzde',
+    odevbasari: 'odevYuzde',
+    katilimyuzde: 'katilimYuzde',
+    katilimyuzdesi: 'katilimYuzde',
+    islenenkonu: 'islenenKonu',
+    islenenkonular: 'islenenKonu',
+    konu: 'islenenKonu',
+    anlamaduzeyi: 'anlamaDuzeyi',
+    evcalismasi: 'evCalismasi',
+    evcalisma: 'evCalismasi',
+    ogretmennotu: 'ogretmenNotu',
+    songuncelleme: 'sonGuncelleme',
+    veligordu: 'veliGordu',
+    geneldurum: 'genelDurum',
+    dersekatilim: 'derseKatilim',
+    sorusorma: 'soruSorma',
+    dersehazirlik: 'derseHazirlik',
+    dikkatilgi: 'dikkatIlgi',
+    dikkatveilgi: 'dikkatIlgi'
+  };
+
+  if (aliases[key]) return aliases[key];
+  const denemeMatch = key.match(/^deneme(\d+)$/);
+  if (denemeMatch) return `deneme${denemeMatch[1]}`;
+  return raw;
 }
 
 function readRows_() {
@@ -451,11 +512,14 @@ function readRows_() {
 
   if (lastRow < 2) return [];
 
-  const values = sheet.getRange(2, 1, lastRow - 1, HEADERS.length).getValues();
+  const headerMap = getHeaderMap_(sheet);
+  const lastColumn = Math.max(sheet.getLastColumn(), HEADERS.length);
+  const values = sheet.getRange(2, 1, lastRow - 1, lastColumn).getValues();
   return values.map(row => {
     const item = {};
-    HEADERS.forEach((header, index) => {
-      item[header] = row[index];
+    HEADERS.forEach(header => {
+      const column = headerMap[header];
+      item[header] = column ? row[column - 1] : '';
     });
     for (let index = 1; index <= 12; index++) {
       const key = `deneme${index}`;
@@ -479,7 +543,9 @@ function findRowByStudentNo_(studentNo) {
 
   if (lastRow < 2) return -1;
 
-  const values = sheet.getRange(2, 1, lastRow - 1, 1).getValues();
+  const headerMap = getHeaderMap_(sheet);
+  const studentNoColumn = headerMap.studentNo || 1;
+  const values = sheet.getRange(2, studentNoColumn, lastRow - 1, 1).getValues();
   const foundIndex = values.findIndex(row => String(row[0]) === studentNo);
 
   return foundIndex === -1 ? -1 : foundIndex + 2;
