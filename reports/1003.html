@@ -121,6 +121,27 @@
     font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 700;
     color: var(--green-dark); border: none; background: transparent; outline: none; cursor: pointer;
   }
+  .durum-badge.durum-good { background: var(--green-light); }
+  .durum-badge.durum-good svg,
+  .durum-badge.durum-good .durum-label,
+  .durum-badge.durum-good .durum-select {
+    color: var(--green-dark) !important;
+    -webkit-text-fill-color: var(--green-dark);
+  }
+  .durum-badge.durum-mid { background: var(--amber-light); }
+  .durum-badge.durum-mid svg,
+  .durum-badge.durum-mid .durum-label,
+  .durum-badge.durum-mid .durum-select {
+    color: var(--amber-dark) !important;
+    -webkit-text-fill-color: var(--amber-dark);
+  }
+  .durum-badge.durum-low { background: var(--red-light); }
+  .durum-badge.durum-low svg,
+  .durum-badge.durum-low .durum-label,
+  .durum-badge.durum-low .durum-select {
+    color: var(--red-dark) !important;
+    -webkit-text-fill-color: var(--red-dark);
+  }
 
   /* ── GRID ── */
   .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
@@ -428,8 +449,6 @@
   body.veli-mode #genelDurum,
   body.veli-mode #anlamaDuzeyi {
     opacity: 1;
-    color: var(--green-dark) !important;
-    -webkit-text-fill-color: var(--green-dark);
   }
 
   /* ── ÖĞRENCİ LİSTESİ PANELİ ── */
@@ -1065,18 +1084,28 @@ wi.value = yr + '-W' + String(wk).padStart(2, '0');
 // ── SELECT COLOR ──
 function colorSelect(el) {
   el.className = 'sev-select';
-  const v = el.value;
+  const v = normalizeDurumValue(el.value);
+  if (v) el.value = v;
   if (v === 'Çok İyi' || v === 'İyi') el.classList.add('sev-iyi');
   else if (v === 'Orta') el.classList.add('sev-orta');
-  else el.classList.add('sev-zayif');
+  else if (v === 'Zayıf') el.classList.add('sev-zayif');
 }
 
 function colorDurumSelect(el) {
   el.classList.remove('sev-iyi', 'sev-orta', 'sev-zayif');
-  const v = el.value;
+  const v = normalizeDurumValue(el.value);
+  if (v) el.value = v;
   if (v === 'Çok İyi' || v === 'İyi') el.classList.add('sev-iyi');
   else if (v === 'Orta') el.classList.add('sev-orta');
   else if (v === 'Zayıf') el.classList.add('sev-zayif');
+
+  const badge = el.closest('.durum-badge');
+  if (badge) {
+    badge.classList.remove('durum-good', 'durum-mid', 'durum-low');
+    if (v === 'Çok İyi' || v === 'İyi') badge.classList.add('durum-good');
+    else if (v === 'Orta') badge.classList.add('durum-mid');
+    else if (v === 'Zayıf') badge.classList.add('durum-low');
+  }
 }
 
 // ── ÖDEV ──
@@ -1729,6 +1758,17 @@ function normalizeAnlamaDuzeyi(value) {
   if (lower === 'iyi') return 'İyi';
   if (lower === 'orta') return 'Orta';
   if (lower === 'kötü' || lower === 'kotu') return 'Zayıf';
+  return text;
+}
+
+function normalizeDurumValue(value) {
+  const text = String(value || '').trim();
+  if (!text) return '';
+  const lower = text.toLocaleLowerCase('tr-TR');
+  if (lower === 'çok iyi' || lower === 'cok iyi') return 'Çok İyi';
+  if (lower === 'iyi') return 'İyi';
+  if (lower === 'orta') return 'Orta';
+  if (lower === 'zayıf' || lower === 'zayif' || lower === 'kötü' || lower === 'kotu' || lower === 'gelistirilmeli' || lower === 'geliştirilmeli') return 'Zayıf';
   return text;
 }
 
