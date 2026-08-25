@@ -173,7 +173,9 @@ function generatePin(studentNo, fullName) {
   const parts = String(fullName || "").trim().split(/\s+/).filter(Boolean);
   const letterPattern = /[A-Za-zÇĞİÖŞÜçğıöşü]/u;
   const firstWord = parts.find(part => letterPattern.test(part)) || "";
-  const lastWord = [...parts].reverse().find(part => letterPattern.test(part) && part !== firstWord) || "";
+  const lastWord = parts.length > 1
+    ? [...parts].reverse().find(part => letterPattern.test(part)) || ""
+    : "";
   const firstInitial = firstWord ? (Array.from(firstWord).find(char => letterPattern.test(char)) || "") : "";
   const lastInitial = lastWord ? (Array.from(lastWord).find(char => letterPattern.test(char)) || "") : "";
   return `${String(studentNo || "").trim()}${firstInitial}${lastInitial}`.toLocaleUpperCase("tr-TR");
@@ -624,6 +626,7 @@ function parseStudentLine(line, fallbackIndex) {
 function addBulkStudents() {
   const lines = bulkStudentText.value.split(/\r?\n/);
   let added = 0;
+  let skipped = 0;
   const targetClass = bulkClassSelect.value;
   const targetBranch = bulkBranchSelect.value;
   let fallbackIndex = reports.filter(report => String(report.sinif) === targetClass && String(report.sube) === targetBranch).length + 1;
@@ -632,7 +635,10 @@ function addBulkStudents() {
     activeClass = targetClass;
     activeBranch = targetBranch;
     const report = parseStudentLine(line, fallbackIndex);
-    if (!report) return;
+    if (!report) {
+      if (String(line || "").trim()) skipped++;
+      return;
+    }
 
     const existingIndex = reports.findIndex(item => String(item.studentNo) === String(report.studentNo));
     if (existingIndex >= 0) {
@@ -646,8 +652,17 @@ function addBulkStudents() {
   });
 
   displayBranchSelect.value = targetBranch;
-  bulkResult.textContent = `${added} öğrenci ${targetClass}. Sınıf ${targetBranch} Şubesi listesine eklendi.`;
-  bulkStudentText.value = "";
+  if (!added) {
+    bulkResult.textContent = skipped
+      ? "Kayıt eklenmedi. Her satırı 'numara ad soyad' şeklinde yazın. Örnek: 5101 Ali Yılmaz"
+      : "Eklenecek öğrenci yazılmadı.";
+    return;
+  }
+
+  bulkResult.textContent = skipped
+    ? `${added} öğrenci eklendi, ${skipped} hatalı satır atlandı. Hatalı satırlar için numara ad soyad yazın.`
+    : `${added} öğrenci ${targetClass}. Sınıf ${targetBranch} Şubesi listesine eklendi.`;
+  if (!skipped) bulkStudentText.value = "";
   renderStudents();
 }
 
