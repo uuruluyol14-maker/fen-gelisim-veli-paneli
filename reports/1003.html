@@ -413,9 +413,8 @@
     background: transparent !important;
   }
   body.veli-mode #teacherNote {
-    pointer-events: auto;
-    max-height: 210px;
-    overflow-y: auto;
+    min-height: 132px;
+    overflow: hidden;
     resize: none;
     cursor: default;
   }
@@ -1745,6 +1744,13 @@ function applyAnlamaLevelClass(el, value) {
   if (String(value || '').trim()) el.classList.add(anlamaLevelClass(value));
 }
 
+function resizeTeacherNote() {
+  const note = document.getElementById('teacherNote');
+  if (!note) return;
+  note.style.height = 'auto';
+  note.style.height = Math.max(132, note.scrollHeight + 4) + 'px';
+}
+
 function veliModuHazirla() {
   const params = new URLSearchParams(window.location.search);
   if (params.get('veli') !== '1') return;
@@ -1776,9 +1782,11 @@ function veliModuHazirla() {
     el.disabled = true;
     el.tabIndex = -1;
   });
+  resizeTeacherNote();
 }
 
 googleSheetsVerisiniUygula();
+resizeTeacherNote();
 veliModuHazirla();
 </script>
 </body>
