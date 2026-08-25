@@ -171,9 +171,39 @@ function callSheets(action, params = {}) {
 
 function generatePin(studentNo, fullName) {
   const parts = String(fullName || "").trim().split(/\s+/).filter(Boolean);
-  const firstInitial = parts[0] ? parts[0][0] : "";
-  const lastInitial = parts.length > 1 ? parts[parts.length - 1][0] : "";
+  const letterPattern = /[A-Za-zÇĞİÖŞÜçğıöşü]/;
+  const firstWord = parts.find(part => letterPattern.test(part)) || "";
+  const lastWord = [...parts].reverse().find(part => letterPattern.test(part) && part !== firstWord) || "";
+  const firstInitial = firstWord ? (Array.from(firstWord).find(char => letterPattern.test(char)) || "") : "";
+  const lastInitial = lastWord ? (Array.from(lastWord).find(char => letterPattern.test(char)) || "") : "";
   return `${String(studentNo || "").trim()}${firstInitial}${lastInitial}`.toLocaleUpperCase("tr-TR");
+}
+
+function expectedPin(report = {}) {
+  return generatePin(report.studentNo, fullName(report));
+}
+
+function branchOrder(branch) {
+  const normalized = String(branch || "A").trim().toLocaleUpperCase("tr-TR");
+  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const index = alphabet.indexOf(normalized[0]);
+  return index >= 0 ? index + 1 : 1;
+}
+
+function autoStudentNo(classLevel = activeClass, branch = activeBranch) {
+  const classText = String(classLevel || "5").replace(/\D/g, "") || "5";
+  const branchNo = branchOrder(branch);
+  const prefix = Number(classText) * 1000 + branchNo * 100;
+  const usedNumbers = reports
+    .map(report => Number(String(report.studentNo || "").replace(/\D/g, "")))
+    .filter(Number.isFinite);
+
+  for (let index = 1; index <= 99; index += 1) {
+    const candidate = String(prefix + index);
+    if (!usedNumbers.includes(Number(candidate))) return candidate;
+  }
+
+  return String(prefix + usedNumbers.length + 1);
 }
 
 function splitName(report = {}) {
@@ -275,7 +305,16 @@ function collectForm() {
   const data = new FormData(form);
   const report = Object.fromEntries(data.entries());
   report.adSoyad = `${report.ad || ""} ${report.soyad || ""}`.trim();
+  report.sinif = String(report.sinif || "").trim() || activeClass;
+  report.sube = String(report.sube || "").trim() || activeBranch;
+  if (!String(report.studentNo || "").trim() && report.adSoyad) {
+    report.studentNo = autoStudentNo(report.sinif, report.sube);
+    studentNoInput.value = report.studentNo;
+  }
+  classInput.value = report.sinif;
+  branchInput.value = report.sube;
   report.pin = generatePin(report.studentNo, report.adSoyad);
+  pinInput.value = report.pin;
   report.genelDurum = normalizeLevelValue(report.genelDurum);
   report.anlamaDuzeyi = normalizeLevelValue(report.anlamaDuzeyi);
   report.derseKatilim = normalizeLevelValue(report.derseKatilim);
@@ -363,6 +402,8 @@ function fillForm(report = {}) {
   const generalLevel = normalizeLevelValue(report.genelDurum);
   form.reset();
   activeStudentNo = String(report.studentNo || "");
+  if (report.sinif) activeClass = String(report.sinif);
+  if (report.sube) activeBranch = String(report.sube);
   selectedLabel.textContent = displayName || "Yeni kayıt";
 
   form.elements.studentNo.value = report.studentNo || "";
@@ -371,7 +412,7 @@ function fillForm(report = {}) {
   form.elements.adSoyad.value = displayName;
   form.elements.sinif.value = report.sinif || "";
   form.elements.sube.value = report.sube || "";
-  form.elements.pin.value = report.pin || generatePin(report.studentNo, displayName);
+  form.elements.pin.value = expectedPin({ ...report, adSoyad: displayName });
   form.elements.genelDurum.value = generalLevel || "";
   form.elements.derseKatilim.value = normalizeLevelValue(report.derseKatilim) || "İyi";
   form.elements.soruSorma.value = normalizeLevelValue(report.soruSorma) || "Orta";
@@ -399,6 +440,8 @@ function fillForm(report = {}) {
 
 function updateComputedFields() {
   nameInput.value = `${firstNameInput.value.trim()} ${lastNameInput.value.trim()}`.trim();
+  if (!classInput.value) classInput.value = activeClass;
+  if (!branchInput.value) branchInput.value = activeBranch;
   pinInput.value = generatePin(studentNoInput.value, nameInput.value);
   const homeworkRaw = document.getElementById("homeworkInput").value;
   const participationRaw = document.getElementById("participationInput").value;
@@ -530,7 +573,7 @@ function renderStudents() {
   studentList.innerHTML = visibleReports.map((report, index) => {
     const active = String(report.studentNo) === activeStudentNo ? " active" : "";
     const displayName = fullName(report);
-    const pin = report.pin || generatePin(report.studentNo, displayName);
+    const pin = expectedPin({ ...report, adSoyad: displayName });
     const viewedAt = report.veliGordu || report.goruldu || "";
     const viewedTime = formatViewedAt(viewedAt);
     const viewedBadge = viewedAt
@@ -558,7 +601,7 @@ function parseStudentLine(line, fallbackIndex) {
   const hasNumber = /^\d+$/.test(firstToken);
   const studentNo = hasNumber
     ? firstToken
-    : `${activeClass}${activeBranch}${String(fallbackIndex).padStart(3, "0")}`;
+    : autoStudentNo(bulkClassSelect.value, bulkBranchSelect.value);
   const nameText = hasNumber ? parts.slice(1).join(" ") : clean;
   const names = splitName({ adSoyad: nameText });
   const adSoyad = `${names.ad} ${names.soyad}`.trim();
@@ -622,7 +665,9 @@ async function saveVisibleStudentsToSheets() {
   try {
     let saved = 0;
     for (const report of visibleReports) {
-      const result = await callSheets("saveReport", { ...report, ...sharedFields });
+      const reportToSave = { ...report, ...sharedFields };
+      reportToSave.pin = expectedPin(reportToSave);
+      const result = await callSheets("saveReport", reportToSave);
       if (!result.ok) throw new Error(result.error || "Kayıt yapılamadı.");
       saved++;
     }
@@ -648,7 +693,7 @@ async function loadReports() {
     reports = (result.reports || [])
       .map(report => ({
         ...report,
-        pin: report.pin || generatePin(report.studentNo, fullName(report))
+        pin: expectedPin(report)
       }))
       .filter(isValidStudent);
 
@@ -700,6 +745,7 @@ listen(form, "submit", async (event) => {
     if (!result.ok) throw new Error(result.error || "Kayıt yapılamadı.");
 
     const savedReport = { ...report, ...(result.report || {}) };
+    savedReport.pin = expectedPin(savedReport);
     savedReport.genelDurum = normalizeLevelValue(savedReport.genelDurum) || report.genelDurum;
     savedReport.anlamaDuzeyi = normalizeLevelValue(savedReport.anlamaDuzeyi) || report.anlamaDuzeyi;
     savedReport.derseKatilim = normalizeLevelValue(savedReport.derseKatilim) || report.derseKatilim;
