@@ -171,7 +171,7 @@ function callSheets(action, params = {}) {
 
 function generatePin(studentNo, fullName) {
   const parts = String(fullName || "").trim().split(/\s+/).filter(Boolean);
-  const letterPattern = /[A-Za-zÇĞİÖŞÜçğıöşü]/;
+  const letterPattern = /[A-Za-zÇĞİÖŞÜçğıöşü]/u;
   const firstWord = parts.find(part => letterPattern.test(part)) || "";
   const lastWord = [...parts].reverse().find(part => letterPattern.test(part) && part !== firstWord) || "";
   const firstInitial = firstWord ? (Array.from(firstWord).find(char => letterPattern.test(char)) || "") : "";
@@ -596,17 +596,18 @@ function parseStudentLine(line, fallbackIndex) {
   const clean = String(line || "").trim().replace(/\s+/g, " ");
   if (!clean) return null;
 
-  const parts = clean.split(" ");
-  const firstToken = parts[0];
-  const hasNumber = /^\d+$/.test(firstToken);
-  const studentNo = hasNumber
-    ? firstToken
+  const numbered = clean.match(/^(\d+)\s*(.*)$/);
+  const studentNo = numbered
+    ? numbered[1]
     : autoStudentNo(bulkClassSelect.value, bulkBranchSelect.value);
-  const nameText = hasNumber ? parts.slice(1).join(" ") : clean;
+  const nameText = numbered ? numbered[2].trim() : clean;
   const names = splitName({ adSoyad: nameText });
   const adSoyad = `${names.ad} ${names.soyad}`.trim();
 
-  if (!adSoyad) return null;
+  if (!adSoyad || !names.soyad) {
+    bulkResult.textContent = "Lütfen her satırı 'numara ad soyad' şeklinde yazın. Örnek: 5101 Ali Yılmaz";
+    return null;
+  }
 
   return {
     ...collectSharedReportFields(),
