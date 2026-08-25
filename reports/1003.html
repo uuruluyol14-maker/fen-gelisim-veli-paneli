@@ -1144,21 +1144,17 @@ function updateOdevYorumu(pct) {
   }
 
   let durum = 'tip-good';
-  let durumMetni = 'Çok İyi';
+  let durumMetni = 'İyi';
   let mesaj = 'Ödevlerini düzenli ve eksiksiz tamamlıyor. Bu çalışma disiplini başarıya olumlu yansıyor.';
 
   if (pct < 50) {
     durum = 'tip-low';
     durumMetni = 'Zayıf';
     mesaj = 'Ödev takibi zayıf görünüyor. Bu hafta öncelik, eksik çalışmaların tamamlanması ve düzenli çalışma alışkanlığının kurulması olmalı.';
-  } else if (pct < 70) {
-    durum = 'tip-low';
-    durumMetni = 'Geliştirilmeli';
-    mesaj = 'Ödevlerde eksikler var. Konunun kalıcı olması için verilen çalışmaların daha düzenli tamamlanması gerekiyor.';
-  } else if (pct < 90) {
+  } else if (pct < 80) {
     durum = 'tip-mid';
-    durumMetni = 'İyi';
-    mesaj = 'Ödevlerini genel olarak takip ediyor. Çalışma düzeni korunduğunda konu pekişmesi daha güçlü olacaktır.';
+    durumMetni = 'Orta';
+    mesaj = 'Ödev takibi genel olarak iyi. Eksik kalan çalışmalar tamamlandığında başarı daha hızlı artacaktır.';
   }
 
   tipBox.className = 'tip-box ' + durum;
