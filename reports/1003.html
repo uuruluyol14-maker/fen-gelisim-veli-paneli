@@ -194,12 +194,36 @@
   .stat-line { display: flex; flex-direction: column; gap: 1px; }
   .stat-lbl { font-size: 11px; color: var(--text-muted); }
   .stat-val { font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 700; }
+  .homework-status-pill {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    min-height: 28px;
+    border-radius: 6px;
+    padding: 3px 10px;
+    border: 1px solid var(--gray-border);
+  }
   .stat-val input {
     font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 700;
     color: var(--green); border: none; background: transparent; outline: none;
     border-bottom: 1px dashed var(--gray-border); width: 44px; text-align: center;
   }
   .stat-val.red { color: var(--red); }
+  .homework-status-pill.status-good {
+    color: var(--green-dark) !important;
+    background: var(--green-light) !important;
+    border-color: var(--green-mid) !important;
+  }
+  .homework-status-pill.status-mid {
+    color: var(--amber-dark) !important;
+    background: var(--amber-light) !important;
+    border-color: #FAC775 !important;
+  }
+  .homework-status-pill.status-low {
+    color: var(--red-dark) !important;
+    background: var(--red-light) !important;
+    border-color: #F7C1C1 !important;
+  }
 
   /* ── TIP BOX ── */
   .tip-box {
@@ -438,6 +462,15 @@
     overflow: hidden;
     resize: none;
     cursor: default;
+    border-color: var(--gray-border) !important;
+    background: var(--gray-light) !important;
+    padding: 10px 12px;
+  }
+  body.veli-mode #islenenKonu,
+  body.veli-mode #evCalismasi {
+    border-color: var(--gray-border) !important;
+    background: var(--gray-light) !important;
+    padding: 9px 10px;
   }
   body.veli-mode .student-name-input {
     width: min(620px, 100%);
@@ -1159,7 +1192,7 @@ function updateOdevYorumu(pct) {
 
   tipBox.className = 'tip-box ' + durum;
   durumEl.textContent = durumMetni;
-  durumEl.className = durum === 'tip-low' ? 'stat-val red' : 'stat-val';
+  durumEl.className = 'stat-val homework-status-pill ' + (durum === 'tip-low' ? 'status-low' : durum === 'tip-mid' ? 'status-mid' : 'status-good');
   tipInput.value = mesaj;
   tipInput.style.height = 'auto';
   tipInput.style.height = tipInput.scrollHeight + 'px';
